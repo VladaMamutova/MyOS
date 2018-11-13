@@ -1,0 +1,15 @@
+﻿<Window x:Class="MyOS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MyOS"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="358" Width="549">
+    <Grid>
+        <Button x:Name="Create" Content="Форматировать диск" HorizontalAlignment="Left" Margin="10,21,0,0" VerticalAlignment="Top" Width="521" Height="53" Click="Create_Click"/>
+        <Button x:Name="TestMyDateTime" Content="Тест текущего времени" HorizontalAlignment="Left" Height="30" Margin="10,117,0,0" VerticalAlignment="Top" Width="256" Click="TestMyDateTime_Click"/>
+        <Button x:Name="CreateFile" Content="Создать файл" HorizontalAlignment="Left" Height="30" Margin="10,154,0,0" VerticalAlignment="Top" Width="256" Click="CreateFile_Click"/>
+
+    </Grid>
+</Window>
