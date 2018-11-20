@@ -1,18 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MyOS
 {
@@ -37,6 +24,13 @@ namespace MyOS
             SystemStructures.MyDateTime myDateTimeNow = new SystemStructures.MyDateTime(now);
             MessageBox.Show("DateTime.Now: " + now + Environment.NewLine +
                             "MyDateTime: " + myDateTimeNow + " (" + myDateTimeNow.GetStringUtcHours() + ")");
+            AccessControlList accessList = new AccessControlList();
+            accessList.Add(1, new[] {AccessControlList.Rights.F, AccessControlList.Rights.M});
+            MessageBox.Show(accessList.ToBytes()[0].ToString() + accessList.ToBytes()[1]);
+            accessList.Add(1, new[] { AccessControlList.Rights.R, AccessControlList.Rights.W, AccessControlList.Rights.M });
+            MessageBox.Show(accessList.ToBytes().ToString());
+            accessList.Add(2, new[] { AccessControlList.Rights.R });
+            MessageBox.Show(accessList.ToBytes()[0].ToString() + accessList.ToBytes()[1]);
         }
 
         private void CreateFile_Click(object sender, RoutedEventArgs e)
