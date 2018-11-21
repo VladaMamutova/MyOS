@@ -16,51 +16,39 @@ namespace MyOS
             public const ushort MftHeaderLength = 51; // Размер заголовка записи в MFT (информация о файле, без данных).
 
             public const byte MftRecNumber = 1;
-            public const byte VolumeRecNumber = 2;
-            public const byte RootDirectoryRecNumber = 3;
-            public const byte BitmapRecNumber = 4;
-            public const byte UserListRecNumber = 5;
+            public const byte MftMirrRecNumber = 2;
+            public const byte VolumeRecNumber = 3;
+            public const byte RootDirectoryRecNumber = 4;
+            public const byte BitmapRecNumber = 5;
+            public const byte UserListRecNumber = 6;
 
-            public const int MftAreaSize = 41943040; // Размер MFT-пространства.
+            public const int VolumeSize = 419430400; // Размер раздела с операционной системой.
+            public const int MftAreaSize = 41943040; // Размер MFT-пространства (10% от всего размера).
             public const int RootSize = 409600; // Размер корневого каталога (100 кластеров * 4096 байтов).
             public const int BitmapSize = 25600; // Размер битовой карты (102 400 кластеров * 2 бита / 8 битов в байте = 25600 байтов).
-            public const ushort BytesPerClus = 4096; // Размер кластера.
+            public const ushort BytesPerClus = 4096; // Размер кластера в байтах.
+            //public const int ClusterCount = 102400;
+            //public const int FreeClusters = 92160;
+
             public const byte AdminUid = 1; // Идентификатор администратора.
             public const byte UserRecSize = 193; // Размер заявки пользователя в списке пользователей.
-
-            public const byte volumeNameSize = 1;
-            public const byte fsVersionSize = 9;
-            public const byte stateSize = 1;
+            public const byte VolumeNameSize = 1;
+            public const byte FsVersionSize = 9;
+            public const byte StateSize = 1;
         }
-        
-        // Атрибут Data файлов.
+
+        /// <summary>
+        /// Атрибут Data записей MFT.
+        /// </summary>
         public struct Data
         {
-            public struct ExtentPointer
-            {
-                public int RecNumber;
-                public byte Count;
-
-                public ExtentPointer(int recNumber, byte count)
-                {
-                    RecNumber = recNumber;
-                    Count = count;
-                }
-            }
-
             public byte Header;
-            public ExtentPointer[] Extents;
+            public int[] Blocks;
 
-            public Data(int resident = 0)
+            public Data(int[] blocks)
             {
-                Header = 0;
-                Extents = null;
-            }
-
-            public Data(ExtentPointer[] extents)
-            {
-                Header = 1;
-                Extents = extents;
+                Header = (byte)(blocks == null ? 0 : 1);
+                Blocks = blocks;
             }
         }
 
@@ -70,12 +58,7 @@ namespace MyOS
         public struct MyDateTime
         {
             public byte[] DateTimeBytes;
-
-            public MyDateTime(MyDateTime dateTime)
-            {
-                DateTimeBytes = dateTime.DateTimeBytes;
-            }
-
+            
             public MyDateTime(DateTime dateTime)
             {
                 DateTimeBytes = new byte[5];

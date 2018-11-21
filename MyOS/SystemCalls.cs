@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -17,154 +18,188 @@ namespace MyOS
             accessControlList = new AccessControlList();
         }
 
+        #region Метод форматирования и поддерживающие его методы.
+        
         public static void Formatting()
         {
             using (var fileStream = new FileStream("MyOS.txt", FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                fileStream.SetLength(419430400); // Устанавливаем размер файла в 400 Мб.
-            }
+                fileStream.SetLength(Constants.VolumeSize); // Устанавливаем размер файла в 400 Мб.
+            
 
             BinaryWriter bw = new BinaryWriter(File.Open("MyOS.txt", FileMode.Open));
             MyDateTime nowDateTime = new MyDateTime(DateTime.Now);
-           
+
             #region Форматирование MFT-пространства.
 
             // Создание файла $MFT, представляющего централизованный каталог
             // всех остальных файлов диска и себя самого.
-            // Первые 5 записей - служебные.
-
+            // Первые 6 записей - служебные.
             // 1 файл - запись о самом MFT.
+            // 2 файл - запись о копии первых записей MFT.
+            // 3 файл - $Volume.
+            // 4 файл - $. (корневой каталог).
+            // 5 файл - $Bitmap (битовая карта).
+            // 6 файл - $Users (список пользователей системы).
+
             MftRecord mft = new MftRecord
             {
                 Sign = MftRecord.Signature.InUse, // Признак - запись используется.
                 Attributes = 0b11, // Системный файл, только для чтения.
                 Extension = "",
-                Size = 1024, // Размер MFT. Пока 51 байт под данную запись, потом обновить!!!
-                CreatDate = nowDateTime,
-                ModifDate = nowDateTime,
+                Size = 38 * 1024, // Размер MFT. При форматировании по умолчанию создаётся 38 записей MFT по 1024 Б.
+                CreationDate = nowDateTime,
+                ModificationDate = nowDateTime,
                 UserId = Constants.AdminUid,
                 FileName = "$MFT",
                 SecurityDescriptor = 6,
                 DataAtr = new Data()
             };
-            WriteMftRecordToFile(bw, mft, Constants.MftRecNumber);
-            WriteAccessControlListToFile(bw, 6);
-
-            // 2 файл - $Volume.
+            MftRecord mftMirr = new MftRecord
+            {
+                Sign = MftRecord.Signature.InUse, // Признак - запись используется.
+                Attributes = 0b11, // Системный файл, только для чтения.
+                Extension = "",
+                Size = 6144, // Размер MFTMirrow. Всего 6 служебных записей MFT * 1024 = 6144 байт.
+                CreationDate = nowDateTime,
+                ModificationDate = nowDateTime,
+                UserId = Constants.AdminUid,
+                FileName = "$MFTMirr",
+                SecurityDescriptor = 7,
+                DataAtr = new Data()
+            };
             MftRecord volume = new MftRecord
             {
                 Sign = MftRecord.Signature.InUse, // Признак - запись используется.
                 Attributes = 0b11, // Системный файл, только для чтения.
                 Extension = "",
                 Size = 11,
-                CreatDate = nowDateTime,
-                ModifDate = nowDateTime,
+                CreationDate = nowDateTime,
+                ModificationDate = nowDateTime,
                 UserId = Constants.AdminUid,
                 FileName = "$Volume",
-                SecurityDescriptor = 7,
+                SecurityDescriptor = 8,
                 DataAtr = new Data()
             };
-            WriteMftRecordToFile(bw, volume, Constants.VolumeRecNumber);
-            // Записываем в файл данные файла $Volume.
-            bw.Write(GetFormatBytes("H", Constants.volumeNameSize));
-            bw.Write(GetFormatBytes("VMFS v1.0", Constants.fsVersionSize));
-            bw.Write(GetFormatBytes("0", Constants.stateSize));
-            WriteAccessControlListToFile(bw, 7);
-
-            // 3 файл - . (корневой каталог).
             MftRecord rootDirectory = new MftRecord
             {
                 Sign = MftRecord.Signature.InUse, // Признак - запись используется.
                 Attributes = 0b1000, // Директория.
                 Extension = "",
                 Size = 0,
-                CreatDate = nowDateTime,
-                ModifDate = nowDateTime,
+                CreationDate = nowDateTime,
+                ModificationDate = nowDateTime,
                 UserId = Constants.AdminUid,
-                FileName = ".",
-                SecurityDescriptor = 8,
+                FileName = "$.",
+                SecurityDescriptor = 9,
                 DataAtr = new Data()
             };
-            WriteMftRecordToFile(bw, rootDirectory, Constants.RootDirectoryRecNumber);
-            WriteAccessControlListToFile(bw, 8);
-
-            // 4 файл - Bitmap (битовая карта).
+            int[] dataBlocks = new int[Constants.BitmapSize / Constants.MftRecFixSize + 1]; // 
+            for (int i = 0; i < dataBlocks.Length; i++)
+                dataBlocks[i] = i + 11;
             MftRecord bitmap = new MftRecord
             {
                 Sign = MftRecord.Signature.InUse, // Признак - запись используется.
                 Attributes = 0b11, // Системный файл, только для чтения.
                 Extension = "",
                 Size = Constants.BitmapSize,
-                CreatDate = nowDateTime,
-                ModifDate = nowDateTime,
+                CreationDate = nowDateTime,
+                ModificationDate = nowDateTime,
                 UserId = Constants.AdminUid,
                 FileName = "$Bitmap",
-                SecurityDescriptor = 9,
-                DataAtr = new Data(new[] {new Data.ExtentPointer(10, 26)})
+                SecurityDescriptor = 10,
+                DataAtr = new Data(dataBlocks)
             };
-            WriteMftRecordToFile(bw, bitmap, Constants.BitmapRecNumber);
-            WriteAccessControlListToFile(bw, 9);
-
-            // 5 файл - $Users (список пользователей системы).
-            MftRecord usersRecord = new MftRecord
+           MftRecord usersRecord = new MftRecord
             {
                 Sign = MftRecord.Signature.InUse, // Признак - запись используется.
                 Attributes = 0b11, // Системный файл, только для чтения.
                 Extension = "",
                 Size = 193, // Размер одной пользовательской записи, представляющей информацию об администраторе.
-                CreatDate = nowDateTime,
-                ModifDate = nowDateTime,
+                CreationDate = nowDateTime,
+                ModificationDate = nowDateTime,
                 UserId = Constants.AdminUid,
                 FileName = "$Users",
-                SecurityDescriptor = 37,
+                SecurityDescriptor = 38,
                 DataAtr = new Data()
             };
-            // Записываем в файл данные о записи со списком пользователей.
+
+            
+            #region Записываем служебные записи в главную файловую таблицу MFT.
+
+            WriteMftRecordToFile(bw, mft, Constants.MftRecNumber);
+            WriteMftRecordToFile(bw, mftMirr, Constants.MftMirrRecNumber);
+            WriteMftRecordToFile(bw, volume, Constants.VolumeRecNumber);
+            WriteVolumeDataToFile(bw); // Записываем данные в запись $Volume.
+            WriteMftRecordToFile(bw, rootDirectory, Constants.RootDirectoryRecNumber);
+            WriteMftRecordToFile(bw, bitmap, Constants.BitmapRecNumber);
+            WriteBitmapDataToFile(bw, bitmap); // Записываем данные битовой карты $Bitmap.
             WriteMftRecordToFile(bw, usersRecord, Constants.UserListRecNumber);
-            // Записываем в файл список пользователей.
-            WriteUsersToFile(bw);
-            WriteAccessControlListToFile(bw, 37);
-           
-            // Записываем знчения битовой карты, содержащиеся в 26 записях.
-            WriteBitmapDataToFile(bw, bitmap);
-            
+            WriteUsersDataToFile(bw); // Записываем данные (список пользователей) в запись $Users.
+
             #endregion
-            
+
+            #region Записываем в файл MFT списки управления доступом для всех служебных файлов.
+
+            WriteAccessControlListToFile(bw, 6);
+            WriteAccessControlListToFile(bw, 7);
+            WriteAccessControlListToFile(bw, 8);
+            WriteAccessControlListToFile(bw, 9);
+            WriteAccessControlListToFile(bw, 10);
+            WriteAccessControlListToFile(bw, 38);
+
+            #endregion
+
+            #region Записываем копии служебных записей MFT посередине диска.
+
+            WriteMftRecordToFile(bw, mft, Constants.MftRecNumber, true);
+            WriteMftRecordToFile(bw, mftMirr, Constants.MftMirrRecNumber, true);
+            WriteMftRecordToFile(bw, volume, Constants.VolumeRecNumber, true);
+            WriteMftRecordToFile(bw, rootDirectory, Constants.RootDirectoryRecNumber, true);
+            WriteMftRecordToFile(bw, bitmap, Constants.BitmapRecNumber, true);
+            WriteMftRecordToFile(bw, usersRecord, Constants.UserListRecNumber, true);
+
+            #endregion
+
+            #endregion
+
             bw.Close();
 
             MessageBox.Show("Диск отформатирован!");
         }
 
-        static void WriteMftRecordToFile(BinaryWriter bw, MftRecord record, int recordNumber)
+        static void WriteMftRecordToFile(BinaryWriter bw, MftRecord record, int recordNumber, bool mftMirrow = false)
         {
-            bw.BaseStream.Seek((recordNumber - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
+            if (!mftMirrow) // Если данная запись является зеркальным отображением слежебной записи mft,
+                // дополнительно смещаемся на середину диска для записи копии.
+                bw.BaseStream.Seek((recordNumber - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
+            else bw.BaseStream.Seek(Constants.VolumeSize / 2 + (recordNumber - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
 
             bw.Write((byte) record.Sign);
             bw.Write(record.Attributes);
             bw.Write(GetFormatBytes(record.Extension, 5));
             bw.Write(BitConverter.GetBytes(record.Size));
-            bw.Write(record.CreatDate.DateTimeBytes);
-            bw.Write(record.ModifDate.DateTimeBytes);
+            bw.Write(record.CreationDate.DateTimeBytes);
+            bw.Write(record.ModificationDate.DateTimeBytes);
             bw.Write(BitConverter.GetBytes(record.UserId));
             bw.Write(GetFormatBytes(record.FileName, 25));
             bw.Write(BitConverter.GetBytes(record.SecurityDescriptor));
 
             bw.Write(record.DataAtr.Header);
-            for (int i = 0; i < record.DataAtr.Extents?.Length; i++)
-            {
-                bw.Write(BitConverter.GetBytes(record.DataAtr.Extents[i].RecNumber));
-                bw.Write(record.DataAtr.Extents[i].Count);
-            }
+            for (int i = 0; i < record.DataAtr.Blocks?.Length; i++)
+                bw.Write(BitConverter.GetBytes(record.DataAtr.Blocks[i]));
+            
         }
 
-        static void WriteAccessControlListToFile(BinaryWriter bw, int recordNumber)
+        static void WriteVolumeDataToFile(BinaryWriter bw)
         {
-            bw.BaseStream.Seek((recordNumber - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
-            bw.Write((byte)MftRecord.Signature.IsAccessControlList);
-            bw.Write(accessControlList.ToBytes());
+            bw.BaseStream.Seek((Constants.VolumeRecNumber - 1) * Constants.MftRecFixSize + Constants.MftHeaderLength + 1,
+                SeekOrigin.Begin);
+            bw.Write(GetFormatBytes("H", Constants.VolumeNameSize));
+            bw.Write(GetFormatBytes("VMFS v1.0", Constants.FsVersionSize));
+            bw.Write(GetFormatBytes("0", Constants.StateSize));
         }
 
-        static void WriteUsersToFile(BinaryWriter bw)
+        static void WriteUsersDataToFile(BinaryWriter bw)
         {
             bw.BaseStream.Seek((Constants.UserListRecNumber - 1) * Constants.MftRecFixSize + Constants.MftHeaderLength + 1,
                 SeekOrigin.Begin);
@@ -182,33 +217,48 @@ namespace MyOS
 
         static void WriteBitmapDataToFile(BinaryWriter bw, MftRecord bitmap)
         {
-            bw.BaseStream.Seek((bitmap.DataAtr.Extents[0].RecNumber - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
-            byte serviceClusters = 0b10101010; // 4 служебных кластера в байте.
-            byte freeClusters = 0; // 4 свободных кластера в байте.
+            byte service = 0b10; // Служебный кластер.
+            byte free = 0b0; // Свободный кластер.
+            
+            int mftClusterСount = Constants.MftAreaSize / Constants.BytesPerClus;
+            int clusterCount = Constants.VolumeSize / Constants.BytesPerClus;
+            int currentCluster = 1;
 
-            // Информация о кластере в битовой карте записывается двумя битами, поэтому
-            // количество байтов, в которых будет записана информация о кластерах MFT-зоны:
-            int mftBytes = Constants.MftAreaSize / Constants.BytesPerClus * 2 / 8;
-            int restBitmapBytes = Constants.BitmapSize - mftBytes;
-
-            for (int i = 0; i < 26; i++)
+            foreach (var record in bitmap.DataAtr.Blocks)
             {
-                bw.Write((byte)MftRecord.Signature.IsData);
-                for (int j = 0; j < Constants.MftRecFixSize - 1; j++) // -1 байт для заголовка Dataпризнака записи, который был записан выше
+                bw.BaseStream.Seek((record - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
+                bw.Write((byte)MftRecord.Signature.IsData); // Записываем признак записи MFT.
+                for (int i = 0; i < Constants.MftRecFixSize - 1; i++) // -1, т.к. 1 байт уже выделен под признак записи MFT).
                 {
-                    if (mftBytes > 0) // Если не записаны все байты под MFT-зону.
+                    // Кластер представляется 2 битами, значит в байте - информация о 4 кластерах.
+                    byte[] clustersInfo = new byte[4]; // Массив, представляющий информацию о 4 кластерах.
+                    
+                    for (int j = 0; j < 4; j++)
                     {
-                        bw.Write(serviceClusters);
-                        mftBytes--;
+                        // Если в битовую карту записана информация не о всех кластерах, продолжаем заполнять байты.
+                        if (currentCluster <= clusterCount)
+                        {
+                            clustersInfo[j] = currentCluster <= mftClusterСount ||
+                                              currentCluster == clusterCount / 2 ||
+                                              currentCluster == clusterCount / 2 + 1
+                                ? service
+                                : free;
+                            if (currentCluster == 10241) clustersInfo[j] = 0b11;
+                            currentCluster++;
+                        }
                     }
-                    else if (restBitmapBytes > 0) // Продолжаем запись, если все байты битовой карты не записаны.
-                    {
-                        bw.Write(freeClusters);
-                        restBitmapBytes--;
-                    }
+                    bw.Write(GetClusterInfoByte(clustersInfo));
                 }
             }
         }
+
+        static void WriteAccessControlListToFile(BinaryWriter bw, int recordNumber)
+        {
+            bw.BaseStream.Seek((recordNumber - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
+            bw.Write((byte)MftRecord.Signature.IsAccessControlList);
+            bw.Write(accessControlList.ToBytes());
+        }
+
         /// <summary>
         /// Возвращает массив байтов заданной длины, в котором закодированы все символы переданной строки.
         /// </summary>
@@ -224,5 +274,79 @@ namespace MyOS
             resourceBytes.CopyTo(resultBytes, 0);
             return resultBytes;
         }
+
+        static byte GetClusterInfoByte(byte[] clustersInfo)
+        {
+            byte infoByte = 0;
+            if (clustersInfo.Length != 4) return 0;
+            // Заполняем побитово байт с информацией о кластерах.
+            // Порядок кластеров - обратный, для удобства считывания.
+            for (int i = clustersInfo.Length - 1; i >= 0; i--)
+            {
+                // В последние два бита записываем информацию о кластере.
+                infoByte = (byte)(infoByte | clustersInfo[i]);
+                // Сдвигаем байт влево на два бита, осаобождая место под информацию о следующем кластере.
+                if (i != 0) infoByte = (byte)(infoByte << 2);
+            }
+
+            return infoByte;
+        }
+
+        #endregion
+
+        public static bool HasFreeMemory()
+        {
+            using (BinaryReader br = new BinaryReader(File.Open("MyOS.txt", FileMode.Open)))
+            {
+                // Смещаемся на поле данных (на атрибут Data) записи $Bitmap.
+                br.BaseStream.Seek(
+                    (Constants.BitmapRecNumber - 1) * Constants.MftRecFixSize + Constants.MftHeaderLength + 1,
+                    SeekOrigin.Begin);
+
+                if (br.ReadByte() != 1) return false;
+
+                List<int>
+                    recordNumbers =
+                        new List<int>(); // Список номеров записей MFT, в которых содержатся данные битовой карты.
+                int recNumber;
+                while ((recNumber = br.ReadInt32()) != 0)
+                    recordNumbers.Add(recNumber);
+
+                Data bitmapData = new Data(recordNumbers.ToArray());
+                int byteNumber = 0; // Количество прочитанных байт битовой карты.
+
+                foreach (var recordNumber in bitmapData.Blocks)
+                {
+                    br.BaseStream.Seek((recordNumber - 1) * Constants.MftRecFixSize, SeekOrigin.Begin);
+                    if (br.ReadByte() != (byte) MftRecord.Signature.IsData) return false;
+
+                    for (int i = 0; i < Constants.MftRecFixSize - 1; i++) // -1 байт для заголовка Data
+                    {
+                        if (byteNumber >= Constants.BitmapSize) return false;
+
+                        byte fourClustersInfo = br.ReadByte();
+                        byteNumber++;
+                        // Кластер представляется 2 битами, значит в байте - информация о 4 кластерах.
+                        for (int j = 0; j < 4; j++)
+                        {
+                            // Обнуляем первые шесть битов, при этом получая 2 младших бита,
+                            // представляющих информацию об одном кластере.
+                            if ((fourClustersInfo & 0b00000011) == 0) return true; // Кластер свободный.
+                            // Сдвигаемся на 2 бита вправо для получения информации о следующем кластере.
+                            fourClustersInfo = (byte) (fourClustersInfo >> 2);
+                        }
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public static void CreateFile()
+        {
+            // Проверяем, есть ли место на диске для создания нового файла.
+            HasFreeMemory();
+        }
+
     }
 }

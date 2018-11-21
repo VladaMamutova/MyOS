@@ -20,12 +20,12 @@
         public byte Attributes { get; set; } // Атрибуты.
         public string Extension { get; set; } // Расширение файла.
         public int Size { get; set; } // Размер.
-        public SystemStructures.MyDateTime CreatDate { get; set; } // Дата создания файла.
-        public SystemStructures.MyDateTime ModifDate { get; set; } // Дата последней модификации файла.
+        public SystemStructures.MyDateTime CreationDate { get; set; } // Дата создания файла.
+        public SystemStructures.MyDateTime ModificationDate { get; set; } // Дата последней модификации файла.
         public byte UserId { get; set; } // Уникальный идентификатор владельца файла.
         public string FileName { get; set; } // Имя файла.
         public int SecurityDescriptor { get; set; } // Дескриптор безопасности.
-        // Размер информации о файле - 51 байт
+        // Размер информации о файле - 51 байт.
 
         public SystemStructures.Data DataAtr { get; set; }
         
