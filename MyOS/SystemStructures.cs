@@ -12,25 +12,29 @@ namespace MyOS
         /// </summary>
         public struct Constants
         {
+            public const string SystemFile = "VMFS.bin";
+
             public const ushort MftRecFixSize = 1024; // Фиксированный размер записи в MFT.
             public const ushort MftHeaderLength = 51; // Размер заголовка записи в MFT (информация о файле, без данных).
 
-            public const byte MftRecNumber = 1;
-            public const byte MftMirrRecNumber = 2;
-            public const byte VolumeRecNumber = 3;
-            public const byte RootDirectoryRecNumber = 4;
-            public const byte BitmapRecNumber = 5;
-            public const byte UserListRecNumber = 6;
+            public const byte MftRecNumber = 0;
+            public const byte MftMirrRecNumber = 1;
+            public const byte VolumeRecNumber = 2;
+            public const byte RootDirectoryRecNumber = 3;
+            public const byte BitmapRecNumber = 4;
+            public const byte UserListRecNumber = 5;
+            public const byte ServiceFileCount = 6;
 
             public const int VolumeSize = 419430400; // Размер раздела с операционной системой.
             public const int MftAreaSize = 41943040; // Размер MFT-пространства (10% от всего размера).
             public const int RootSize = 409600; // Размер корневого каталога (100 кластеров * 4096 байтов).
             public const int BitmapSize = 25600; // Размер битовой карты (102 400 кластеров * 2 бита / 8 битов в байте = 25600 байтов).
-            public const ushort BytesPerClus = 4096; // Размер кластера в байтах.
+            public const ushort BytesPerCluster = 4096; // Размер кластера в байтах.
             //public const int ClusterCount = 102400;
             //public const int FreeClusters = 92160;
 
-            public const byte AdminUid = 1; // Идентификатор администратора.
+            //public const byte AdminUid = 1; // Идентификатор администратора.
+            public const int MaxUserCount = 256;
             public const byte UserRecSize = 193; // Размер заявки пользователя в списке пользователей.
             public const byte VolumeNameSize = 1;
             public const byte FsVersionSize = 9;
@@ -58,7 +62,14 @@ namespace MyOS
         public struct MyDateTime
         {
             public byte[] DateTimeBytes;
-            
+
+            //public MyDateTime(byte[] dateTimeBytes)
+            //{
+            //    DateTimeBytes = new byte[5];
+            //    if (dateTimeBytes.Length == 5)
+            //        DateTimeBytes = dateTimeBytes;
+            //}
+
             public MyDateTime(DateTime dateTime)
             {
                 DateTimeBytes = new byte[5];

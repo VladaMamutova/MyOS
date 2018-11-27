@@ -55,9 +55,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AccessControlList.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="HashEncryptor.cs" />
-    <Compile Include="MFT_Record.cs" />
-    <Compile Include="Root_Record.cs" />
+    <Compile Include="MFTRecord.cs" />
+    <Compile Include="RootRecord.cs" />
     <Compile Include="SystemCalls.cs" />
     <Compile Include="SystemStructures.cs" />
     <Compile Include="User.cs" />

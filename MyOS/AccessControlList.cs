@@ -19,7 +19,6 @@ namespace MyOS
         public AccessControlList()
         {
             _list = new Dictionary<byte, byte>();
-            Add(SystemStructures.Constants.AdminUid, new[] {Rights.F});
         }
 
         public bool Add(byte uid, Rights[] rights)

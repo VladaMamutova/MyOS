@@ -27,7 +27,7 @@
         public int SecurityDescriptor { get; set; } // Дескриптор безопасности.
         // Размер информации о файле - 51 байт.
 
-        public SystemStructures.Data DataAtr { get; set; }
+        public SystemStructures.Data DataAttributes { get; set; }
         
         // Под данные файла (под Data) отводится 973 байт (1024 - 51).
     }
