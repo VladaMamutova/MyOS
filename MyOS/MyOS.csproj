@@ -55,13 +55,25 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AccessControlList.cs" />
+    <Compile Include="FileCreation.xaml.cs">
+      <DependentUpon>FileCreation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FileOffsetInDirectory.cs" />
+    <Compile Include="Path.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="FileRecord.cs" />
     <Compile Include="HashEncryptor.cs" />
     <Compile Include="MFTRecord.cs" />
+    <Compile Include="MyDateTime.cs" />
     <Compile Include="RootRecord.cs" />
     <Compile Include="SystemCalls.cs" />
-    <Compile Include="SystemStructures.cs" />
+    <Compile Include="SystemData.cs" />
+    <Compile Include="SystemConstants.cs" />
     <Compile Include="User.cs" />
+    <Page Include="FileCreation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

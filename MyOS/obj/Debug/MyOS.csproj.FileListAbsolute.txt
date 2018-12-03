@@ -13,3 +13,5 @@ F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\M
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.csproj.CoreCompileInputs.cache
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.exe
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.pdb
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\FileCreation.baml
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\FileCreation.g.cs

@@ -3,13 +3,22 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        d:DataContext="{d:DesignInstance local:Path}"
         xmlns:local="clr-namespace:MyOS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="358" Width="549">
-    <Grid>
-        <Button x:Name="Create" Content="Форматировать диск" HorizontalAlignment="Left" Margin="10,21,0,0" VerticalAlignment="Top" Width="521" Height="53" Click="Create_Click"/>
-        <Button x:Name="TestMyDateTime" Content="Тест текущего времени" HorizontalAlignment="Left" Height="30" Margin="10,117,0,0" VerticalAlignment="Top" Width="256" Click="TestMyDateTime_Click"/>
-        <Button x:Name="CreateFile" Content="Создать файл" HorizontalAlignment="Left" Height="30" Margin="10,154,0,0" VerticalAlignment="Top" Width="256" Click="CreateFile_Click"/>
+        Title="MainWindow" Height="358" Width="564">
+    <Grid Margin="0,0,17,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="380*"/>
+            <ColumnDefinition Width="93*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="Create" Content="Форматировать диск" HorizontalAlignment="Left" VerticalAlignment="Top" Width="160" Height="33" Click="Create_Click"/>
+        <Button x:Name="TestMyDateTime" Content="Тест текущего времени" HorizontalAlignment="Left" Height="33" Margin="303,294,0,0" VerticalAlignment="Top" Width="170" Click="TestMyDateTime_Click" Grid.ColumnSpan="2"/>
+        <Button x:Name="CreateFile" Content="Создать файл" HorizontalAlignment="Left" Height="33" Margin="160,0,0,0" VerticalAlignment="Top" Width="205" Click="CreateFile_Click"/>
+        <Button x:Name="CreateFolder" Content="Создать папку" HorizontalAlignment="Left" Height="33" Margin="365,0,-16,0" VerticalAlignment="Top" Width="190" Click="CreateFolder_Click" Grid.ColumnSpan="2"/>
+        <Label x:Name="CurrentDirectory" Content="{Binding CurrentPath}" HorizontalAlignment="Left" Margin="44,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="6.3,0.615"></Label>
+        <DataGrid x:Name="FileTable" Margin="44,101,25,62"  MouseDoubleClick="FileTable_OnMouseDoubleClick_MouseDoubleClick" />
+        <Button x:Name="PreviousDirectory" Content="prev" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" Width="27" Height="26" Click="PreviousDirectory_Click"/>
 
     </Grid>
 </Window>

@@ -37,8 +37,9 @@ namespace MyOS
         /// <returns></returns>
         public static byte[] GetFormatBytes(this string source, int resultSize)
         {
+            if (source == null) return new byte[0];
             byte[] resultBytes = new byte[resultSize];
-            byte[] resourceBytes = Encoding.GetEncoding(1251).GetBytes(source);
+            byte[] resourceBytes = Encoding.UTF8.GetBytes(source);
             if (resultSize < resourceBytes.Length) Array.Copy(resourceBytes, resultBytes, resultSize);
             resourceBytes.CopyTo(resultBytes, 0);
             return resultBytes;
