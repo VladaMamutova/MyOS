@@ -1,14 +1,13 @@
-﻿using System.Threading;
-using System.Windows;
+﻿using System.Windows;
 
 namespace MyOS
 {
     /// <summary>
-    /// Логика взаимодействия для FileCreation.xaml
+    /// Логика взаимодействия для FileCreationWindow.xaml
     /// </summary>
-    public partial class FileCreation
+    public partial class FileCreationWindow
     {
-        public FileCreation()
+        public FileCreationWindow()
         {
             InitializeComponent();
         }

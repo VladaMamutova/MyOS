@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\App.xaml
-2742986745
+3-343215802
 
-231486310757
+25-1829594369
 13-1662647192
-FileCreation.xaml;MainWindow.xaml;
+FileCreationWindow.xaml;MainWindow.xaml;TextEditorWindow.xaml;
 
-True
+False
 

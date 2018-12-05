@@ -14,14 +14,14 @@ namespace MyOS
         {
             InitializeComponent();
             Closed += (sender, e) => { _fileCreation.Close(); };
-                _fileCreation = new FileCreation();
+                _fileCreation = new FileCreationWindow();
             CurrentDirectory.DataContext = new Path();
             UpdateFileTable();
         }
 
-        private readonly FileCreation _fileCreation;
+        private readonly FileCreationWindow _fileCreation;
 
-        private void UpdateFileTable()
+        public void UpdateFileTable()
         {
             FileTable.ItemsSource = SystemCalls.GetFileList((Path)CurrentDirectory.DataContext);
         }
@@ -42,19 +42,19 @@ namespace MyOS
 
         private void CreateFile_Click(object sender, RoutedEventArgs e)
         {
-            //_fileCreation.ShowDialog("Создание файла");
-            //int dotIndex = _fileCreation.FileName.Text.LastIndexOf('.');
-            ////проверка на длину имени и расширения
-            //if (dotIndex != -1)
-            //    SystemCalls.CreateFile(_fileCreation.FileName.Text.Substring(0, dotIndex),
-            //        _fileCreation.FileName.Text.Substring(dotIndex), (Path) CurrentDirectory.DataContext);
-            //else SystemCalls.CreateFile(_fileCreation.FileName.Text, "", (Path)CurrentDirectory.DataContext);
-            for (int i = 0; i < 22; i++)
-            {
-                if (i == 21)
-                    MessageBox.Show("");
-                SystemCalls.CreateFile("file" + (i + 1), "txt", (Path)CurrentDirectory.DataContext);
-            }
+            _fileCreation.ShowDialog("Создание файла");
+            int dotIndex = _fileCreation.FileName.Text.LastIndexOf('.');
+            //проверка на длину имени и расширения
+            if (dotIndex != -1)
+                SystemCalls.CreateFile(_fileCreation.FileName.Text.Substring(0, dotIndex),
+                    _fileCreation.FileName.Text.Substring(dotIndex + 1), (Path)CurrentDirectory.DataContext);
+            else SystemCalls.CreateFile(_fileCreation.FileName.Text, "", (Path)CurrentDirectory.DataContext);
+            //for (int i = 0; i < 22; i++)
+            //{
+            //    if (i == 21)
+            //        MessageBox.Show("");
+            //    SystemCalls.CreateFile("file" + (i + 1), "txt", (Path)CurrentDirectory.DataContext);
+            //}
             UpdateFileTable();
         }
 
@@ -84,5 +84,54 @@ namespace MyOS
             UpdateFileTable();
         }
 
+        private void Copy_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTable.CurrentCell.Item is DataGridCellInfo ||
+                !(FileTable.SelectedItem is FileRecord file)) return;
+
+            SystemCalls.Copy((Path)CurrentDirectory.DataContext, file);
+        }
+
+        private void Paste_Click(object sender, RoutedEventArgs e)
+        {
+            SystemCalls.Paste((Path)CurrentDirectory.DataContext);
+        }
+
+        private void Edit_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTable.CurrentCell.Item is DataGridCellInfo ||
+                !(FileTable.SelectedItem is FileRecord file)) return;
+
+            int dotIndex = file.FileName.LastIndexOf('.');
+            string extension = dotIndex == -1 || file.Attributes ==
+                               (file.Attributes | (byte)MftRecord.Attribute.Directory)
+                ? ""
+                : file.FileName.Substring(dotIndex + 1, file.FileName.Length - dotIndex - 1);
+            string fileName =
+                file.FileName.Substring(0, extension.Length > 0 ? file.FileName.Length - extension.Length - 1 : file.FileName.Length);
+            RootRecord bufferRecord = new RootRecord
+            {
+                Attributes = file.Attributes,
+                CreadtionDate = file.CreadtionDate,
+                Extension = extension,
+                FileName = fileName,
+                Size = file.Size,
+                Number = SystemCalls.HasFileWithSuchName(fileName, extension,
+                    SystemCalls.GetDirectoryMftRecordNumber((Path) CurrentDirectory.DataContext))
+            };
+            TextEditorWindow editWindow = new TextEditorWindow(bufferRecord,
+                    SystemCalls.ReadFileData(bufferRecord.Number, bufferRecord.Size),
+                    (Path) CurrentDirectory.DataContext)
+                {Owner = this};
+            editWindow.Show();
+        }
+
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTable.CurrentCell.Item is DataGridCellInfo ||
+                !(FileTable.SelectedItem is FileRecord file)) return;
+
+            //SystemCalls.Delete((Path)CurrentDirectory.DataContext, file);
+        }
     }
 }

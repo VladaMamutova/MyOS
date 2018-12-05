@@ -41,7 +41,7 @@ namespace MyOS
             byte[] resultBytes = new byte[resultSize];
             byte[] resourceBytes = Encoding.UTF8.GetBytes(source);
             if (resultSize < resourceBytes.Length) Array.Copy(resourceBytes, resultBytes, resultSize);
-            resourceBytes.CopyTo(resultBytes, 0);
+            else resourceBytes.CopyTo(resultBytes, 0);
             return resultBytes;
         }
 

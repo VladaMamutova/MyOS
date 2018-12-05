@@ -25,6 +25,7 @@ namespace MyOS
         public const byte VolumeNameSize = 1;
         public const byte FsVersionSize = 9;
         public const byte StateSize = 1;
+        public static SystemBuffer Buffer;
 
         static SystemData()
         {

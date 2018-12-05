@@ -49,6 +49,18 @@ namespace MyOS
             CurrentPath = VolumeName + ":" + Root + string.Join(Separator.ToString(), DirectoriesList);
         }
 
+        public Path(List<string> directories)
+        {
+            DirectoriesList = new List<string>(directories);
+            CurrentPath = VolumeName + ":" + Root + string.Join(Separator.ToString(), DirectoriesList);
+        }
+
+        public Path(Path path)
+        {
+            DirectoriesList = new List<string>(path.DirectoriesList);
+            CurrentPath = path.CurrentPath;
+        }
+
         public void Add(string directory)
         {
             DirectoriesList.Add(directory);

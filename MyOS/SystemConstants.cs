@@ -18,5 +18,13 @@
         public const byte BitmapRecNumber = 4;
         public const byte UserListRecNumber = 5;
         public const byte ServiceFileCount = 6;
+
+        public enum ClusterState : byte
+        {
+            Free = 0,
+            Damaged = 1,
+            Service = 0b10,
+            Busy = 0b11
+        }
     }
 }

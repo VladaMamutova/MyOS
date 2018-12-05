@@ -8,7 +8,7 @@ namespace MyOS
     /// <summary>
     /// Запись корневого каталога.
     /// </summary>
-    class RootRecord
+    public class RootRecord
     {
         public string FileName { get; set; } // Имя файла.
         public byte Attributes { get; set; } // Атрибуты.
@@ -45,7 +45,7 @@ namespace MyOS
 
         public override string ToString()
         {
-            return FileName + (Extension != "" ? "." + Extension : "") + (Attributes == (Attributes | (byte)MftRecord.Attribute.Directory) ? "\\" : "") + "  " + Size + "Б  " + CreadtionDate;
+            return FileName + (Extension != "" ? "." + Extension : "") + "  " + Size + "Б  " + CreadtionDate;
         }
     }
 }
