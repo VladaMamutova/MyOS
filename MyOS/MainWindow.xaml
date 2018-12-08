@@ -19,5 +19,6 @@
         <Button x:Name="Paste" Content="Вставить" HorizontalAlignment="Left" Height="33" Margin="365,33,0,0" VerticalAlignment="Top" Width="190" Click="Paste_Click"/>
         <Button x:Name="Edit" Content="Изменить" HorizontalAlignment="Left" Height="33" Margin="365,66,0,0" VerticalAlignment="Top" Width="190" Click="Edit_Click"/>
         <Button x:Name="Delete" Content="Удалить" HorizontalAlignment="Left" Height="33" Margin="365,99,0,0" VerticalAlignment="Top" Width="190" Click="Delete_Click"/>
+        <Button x:Name="Rename" Content="Переименовать" HorizontalAlignment="Left" Height="33" Margin="160,78,0,0" VerticalAlignment="Top" Width="205" Click="Rename_Click"/>
     </Grid>
 </Window>

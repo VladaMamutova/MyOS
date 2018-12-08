@@ -56,6 +56,7 @@
     </ApplicationDefinition>
     <Compile Include="AccessControlList.cs" />
     <Compile Include="Buffer.cs" />
+    <Compile Include="DataAttributes.cs" />
     <Compile Include="FileCreationWindow.xaml.cs">
       <DependentUpon>FileCreationWindow.xaml</DependentUpon>
     </Compile>
@@ -64,8 +65,9 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="FileRecord.cs" />
     <Compile Include="HashEncryptor.cs" />
-    <Compile Include="MFTRecord.cs" />
+    <Compile Include="MftHeader.cs" />
     <Compile Include="MyDateTime.cs" />
+    <Compile Include="Permissions.cs" />
     <Compile Include="RootRecord.cs" />
     <Compile Include="SystemCalls.cs" />
     <Compile Include="SystemData.cs" />

@@ -7,23 +7,16 @@ namespace MyOS
     /// </summary>
     public partial class FileCreationWindow
     {
-        public FileCreationWindow()
+        public FileCreationWindow(string title)
         {
             InitializeComponent();
-        }
-
-        public void ShowDialog(string title)
-        {
             Title = title;
-            FileName.Text = "";
-            FileName.Focus();
-            ShowDialog();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if(FileName.Text != string.Empty)
-                Hide();
+                Close();
         }
     }
 }

@@ -8,8 +8,6 @@
         public const string SystemFile = "VMFS.bin";
 
         public const ushort MftRecordSize = 1024; // Фиксированный размер записи в MFT.
-        public const ushort MftHeaderLength = 51; // Размер заголовка записи в MFT (информация о файле, без данных).
-        public const ushort RootRecordLength = 43;
 
         public const byte MftRecNumber = 0;
         public const byte MftMirrRecNumber = 1;

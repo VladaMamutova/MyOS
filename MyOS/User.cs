@@ -1,12 +1,14 @@
-﻿//using System.Collections.Generic;
-
-namespace MyOS
+﻿namespace MyOS
 {
     /// <summary>
     /// Запись в списке пользователей, представляющая полную информацию об одном пользователе системы.
     /// </summary>
     public class User
     {
+        public const byte AdminUid = 0; // Идентификатор администратора.
+        public const int MaxUserCount = 256;
+        public const byte InfoSize = 193; // Размер заявки пользователя в списке пользователей.
+
         public string Login { get; set; } // Логин.
         public string Name { get; set; } // Имя пользователя.
         public byte Uid { get; set; } // Уникальный идентификатор.

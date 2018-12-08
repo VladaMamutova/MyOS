@@ -12,31 +12,57 @@ namespace MyOS
         public const int MftAreaSize = 41943040; // Размер MFT-пространства (10% от всего размера).
         public const int RootSize = 409600; // Размер корневого каталога (100 кластеров * 4096 байтов).
 
-        public const int
-            BitmapSize = 25600; // Размер битовой карты (102 400 кластеров * 2 бита / 8 битов в байте = 25600 байтов).
-
         public const ushort BytesPerCluster = 4096; // Размер кластера в байтах.
-        //public const int ClusterCount = 102400;
-        //public const int FreeClusters = 92160;
 
-        //public const byte AdminUid = 1; // Идентификатор администратора.
-        public const int MaxUserCount = 256;
-        public const byte UserRecSize = 193; // Размер заявки пользователя в списке пользователей.
-        public const byte VolumeNameSize = 1;
-        public const byte FsVersionSize = 9;
-        public const byte StateSize = 1;
-        public static SystemBuffer Buffer;
+         public static SystemBuffer Buffer;
+        public static int FreeClusters;
 
         static SystemData()
         {
             using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
-                br.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + SystemConstants.MftHeaderLength, SeekOrigin.Begin);
+                br.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + MftHeader.Length, SeekOrigin.Begin);
                 if (br.ReadByte() == 0) // Данные записи помещаютс в поле данных одной Mft-записи.
                 {
                     VolumeName = br.ReadChar();
-                    FileSystemVersion = Encoding.UTF8.GetString(br.ReadBytes(FsVersionSize));
+                    FileSystemVersion = Encoding.UTF8.GetString(br.ReadBytes(9));
                     State = br.ReadByte();
+                    
+                }
+            }
+            InitializeFreeClusters();
+        }
+
+        public static void InitializeFreeClusters()
+        {
+            DataAttributes bitmap = SystemCalls.ReadDataAttributes(SystemConstants.BitmapRecNumber);
+            using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
+            {
+                int byteNumber = 0; // Номер прочитанного байта в битовой карте.
+
+                foreach (var recordNumber in bitmap.Blocks)
+                {
+                    br.BaseStream.Seek(recordNumber * SystemConstants.MftRecordSize, SeekOrigin.Begin);
+                    if (br.ReadByte() != (byte)MftHeader.Signature.IsData) return;
+
+                    for (int i = 0; i < SystemConstants.MftRecordSize - 1; i++) // -1 байт для заголовка Data
+                    {
+                        if (byteNumber >= bitmap.Size) return;
+
+                        byte fourClustersInfo = br.ReadByte();
+                        // Кластер представляется 2 битами, значит в байте - информация о 4 кластерах.
+                        for (int j = 0; j < 4; j++)
+                        {
+                            // Обнуляем первые шесть битов, при этом получая 2 младших бита,
+                            // представляющих информацию об одном кластере.
+                            if ((fourClustersInfo & 0b00000011) == (byte)SystemConstants.ClusterState.Free)
+                                FreeClusters++; // Увеличиваем счётчик свободных класетров
+                             
+                            // Сдвигаемся на 2 бита вправо для получения информации о следующем кластере.
+                            fourClustersInfo = (byte)(fourClustersInfo >> 2);
+                        }
+                        byteNumber++;
+                    }
                 }
             }
         }

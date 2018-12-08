@@ -34,13 +34,13 @@ namespace MyOS
         {
             using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
-                br.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + SystemConstants.MftHeaderLength, SeekOrigin.Begin);
+                br.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + MftHeader.Length, SeekOrigin.Begin);
                 if (br.ReadByte() == 0) // Данные записи помещаютс в поле данных одной Mft-записи.
                     VolumeName = br.ReadChar();
                 br.BaseStream.Seek(SystemConstants.RootDirectoryRecNumber * SystemConstants.MftRecordSize, SeekOrigin.Begin);
-                MftRecord root = SystemCalls.ReadMftRecord(br);
-                Root = root.FileName.Remove(0, 1); // Удаляем символ $, с которого начинаются все системные файлы.
             }
+            MftHeader root = SystemCalls.GetMftHeader(SystemConstants.RootDirectoryRecNumber);
+            Root = root.FileName; // Удаляем символ $, с которого начинаются все системные файлы.
         }
 
         public Path()
