@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Text;
 using System.Windows;
 
@@ -179,7 +179,7 @@ namespace MyOS
         {
             using (BinaryWriter bw = new BinaryWriter(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
-                bw.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + MftHeader.Length + 1,
+                bw.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + MftHeader.Length,
                     SeekOrigin.Begin);
                 bw.Write("H".GetFormatBytes(1));
                 bw.Write("VMFS v1.0".GetFormatBytes(9));
@@ -375,48 +375,58 @@ namespace MyOS
 
             using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
-                int currentOffset = 0;
+                int offset = 0;
+
                 if (directoryData.Blocks.Count == 0)
                 {
                     br.BaseStream.Seek(directorMftEntry * SystemConstants.MftRecordSize + MftHeader.Length,
                         SeekOrigin.Begin);
 
-                    while (currentOffset < directoryData.Size)
+                    while (offset < directoryData.Size)
                     {
-                        RootRecord file = new RootRecord(br.ReadBytes(RootRecord.Length));
-                        if (fileName + (extension == "" ? "" : '.' + extension) == file.GetFullName())
-                            return currentOffset;
-                        currentOffset += RootRecord.Length;
+                        byte[] recordBytes = br.ReadBytes(RootRecord.Length);
+                        if (!recordBytes.SequenceEqual(new byte[RootRecord.Length]))
+                        {
+                            RootRecord file = new RootRecord(recordBytes);
+                            if (fileName + (extension == "" ? "" : '.' + extension) == file.GetFullName())
+                                return offset;
+                        }
+
+                        offset += RootRecord.Length;
                     }
                 }
                 else
                 {
                     int blockIndex = 0;
-                    while (currentOffset < directoryData.Size)
+                    while (offset < directoryData.Size)
                     {
                         List<byte> recordBytes = new List<byte>();
-                        if (SystemData.BytesPerCluster - currentOffset % SystemData.BytesPerCluster >=
+                        if (SystemData.BytesPerCluster - offset % SystemData.BytesPerCluster >=
                             RootRecord.Length)
                         {
                             br.BaseStream.Seek(
                                 directoryData.Blocks[blockIndex] * SystemData.BytesPerCluster +
-                                currentOffset % SystemData.BytesPerCluster,
+                                offset % SystemData.BytesPerCluster,
                                 SeekOrigin.Begin);
                             recordBytes.AddRange(br.ReadBytes(RootRecord.Length));
                         }
                         else
                         {
                             recordBytes.AddRange(
-                                br.ReadBytes(SystemData.BytesPerCluster - currentOffset % SystemData.BytesPerCluster));
+                                br.ReadBytes(SystemData.BytesPerCluster - offset % SystemData.BytesPerCluster));
                             br.BaseStream.Seek(directoryData.Blocks[++blockIndex] * SystemData.BytesPerCluster,
                                 SeekOrigin.Begin);
                             recordBytes.AddRange(br.ReadBytes(RootRecord.Length - recordBytes.Count));
                         }
 
-                        RootRecord file = new RootRecord(recordBytes.ToArray());
-                        if (fileName + (extension == "" ? "" : '.' + extension) == file.GetFullName())
-                            return currentOffset;
-                        currentOffset += RootRecord.Length;
+                        if (!recordBytes.ToArray().SequenceEqual(new byte[RootRecord.Length]))
+                        {
+                            RootRecord file = new RootRecord(recordBytes.ToArray());
+                            if (fileName + (extension == "" ? "" : '.' + extension) == file.GetFullName())
+                                return offset;
+                        }
+
+                        offset += RootRecord.Length;
                     }
                 }
             }
@@ -475,56 +485,63 @@ namespace MyOS
             DataAttributes directoryData = ReadDataAttributes(directoryMftEntry);
             using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
-                int currentOffset = 0;
+                int offset = 0;
                 if (directoryData.Blocks.Count == 0)
                 {
                     br.BaseStream.Seek(directoryMftEntry * SystemConstants.MftRecordSize + MftHeader.Length, SeekOrigin.Begin);
-                    while (currentOffset < directoryData.Size)
+                    while (offset < directoryData.Size)
                     {
-                        RootRecord file = new RootRecord(br.ReadBytes(RootRecord.Length));
-                        files.Add(new FileRecord
+                        byte[] recordBytes = br.ReadBytes(RootRecord.Length);
+                        if (!recordBytes.SequenceEqual(new byte[RootRecord.Length]))
                         {
-                            Attributes = file.Attributes,
-                            FullName = file.GetFullName(),
-                            CreadtionDate = file.CreadtionDate,
-                            Size = file.Size
-                        });
-                        currentOffset += RootRecord.Length;
+                            RootRecord file = new RootRecord(recordBytes);
+                            files.Add(new FileRecord
+                            {
+                                Attributes = file.Attributes,
+                                FullName = file.GetFullName(),
+                                CreadtionDate = file.CreationDate
+                            });
+                        }
+
+                        offset += RootRecord.Length;
                     }
                 }
                 else
                 {
                     int blockIndex = 0;
-                    while (currentOffset < directoryData.Size)
+                    while (offset < directoryData.Size)
                     {
                         List<byte> recordBytes = new List<byte>();
-                        if (SystemData.BytesPerCluster - currentOffset % SystemData.BytesPerCluster >=
+                        if (SystemData.BytesPerCluster - offset % SystemData.BytesPerCluster >=
                             RootRecord.Length)
                         {
                             br.BaseStream.Seek(
                                 directoryData.Blocks[blockIndex] * SystemData.BytesPerCluster +
-                                currentOffset % SystemData.BytesPerCluster,
+                                offset % SystemData.BytesPerCluster,
                                 SeekOrigin.Begin);
                             recordBytes.AddRange(br.ReadBytes(RootRecord.Length));
                         }
                         else
                         {
                             recordBytes.AddRange(
-                                br.ReadBytes(SystemData.BytesPerCluster - currentOffset % SystemData.BytesPerCluster));
+                                br.ReadBytes(SystemData.BytesPerCluster - offset % SystemData.BytesPerCluster));
                             br.BaseStream.Seek(directoryData.Blocks[++blockIndex] * SystemData.BytesPerCluster,
                                 SeekOrigin.Begin);
                             recordBytes.AddRange(br.ReadBytes(RootRecord.Length - recordBytes.Count));
                         }
 
-                        RootRecord file = new RootRecord(recordBytes.ToArray());
-                        files.Add(new FileRecord
+                        if (!recordBytes.ToArray().SequenceEqual(new byte[RootRecord.Length]))
                         {
-                            Attributes = file.Attributes,
-                            FullName = file.GetFullName(),
-                            CreadtionDate = file.CreadtionDate,
-                            Size = file.Size
-                        });
-                        currentOffset += RootRecord.Length;
+                            RootRecord file = new RootRecord(recordBytes.ToArray());
+                            files.Add(new FileRecord
+                            {
+                                Attributes = file.Attributes,
+                                FullName = file.GetFullName(),
+                                CreadtionDate = file.CreationDate
+                            });
+                        }
+
+                        offset += RootRecord.Length;
                     }
                 }
             }
@@ -534,6 +551,7 @@ namespace MyOS
        
         static void UpdateDirectoryRecord(DataAttributes directoryData, int filePosition, RootRecord record)
         {
+            byte[] recordBytes = record == null ? new byte[RootRecord.Length] : record.GetBytes();
             using (BinaryWriter bw = new BinaryWriter(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
                 // смещаемся на необходимый блок данных - на необходимую запись mft
@@ -541,7 +559,7 @@ namespace MyOS
                 {
                     bw.BaseStream.Seek(directoryData.MftEntry * SystemConstants.MftRecordSize, SeekOrigin.Begin);
                     bw.BaseStream.Seek(MftHeader.Length + filePosition, SeekOrigin.Current);
-                    bw.Write(record.GetBytes());
+                    bw.Write(recordBytes);
                 }
                 else
                 {
@@ -555,34 +573,97 @@ namespace MyOS
                         directoryData.Blocks[blockNumber] * SystemData.BytesPerCluster + recordOffset,
                         SeekOrigin.Begin);
                     if (availableBytes >= RootRecord.Length)
-                        bw.Write(record.GetBytes());
+                        bw.Write(recordBytes);
                     else
                     {
-                        bw.Write(record.GetBytes().GetRange(0, availableBytes));
+                        bw.Write(recordBytes.GetRange(0, availableBytes));
                         bw.BaseStream.Seek(directoryData.Blocks[blockNumber + 1] * SystemData.BytesPerCluster,
                             SeekOrigin.Begin);
-                        bw.Write(record.GetBytes().GetRange(availableBytes, RootRecord.Length - availableBytes));
+                        bw.Write(recordBytes.GetRange(availableBytes, RootRecord.Length - availableBytes));
                     }
                 }
             }
         }
 
-        static int GetNewMftRecordNumber(int haveAlreadyRecieved = 0)
+        static int GetNewMftEntry()
         {
-            DataAttributes mft = ReadDataAttributes(SystemConstants.MftRecNumber);
-            return mft.Size / SystemConstants.MftRecordSize + haveAlreadyRecieved;
-        }
-        
-        public static bool HasMemoryToAddRecord(int recordNumber, int recordSize, int fileSize)
-        {
-            return (recordNumber + 1) * recordSize <= fileSize;
+            using (BinaryReader br= new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
+            {
+                br.BaseStream.Seek(SystemConstants.MftRecNumber * SystemConstants.MftRecordSize, SeekOrigin.Begin);
+                MftHeader mftItselfHeader = new MftHeader(br.ReadBytes(MftHeader.Length));
+                
+                // Просматриваем все записи MFT, начиная с первого доступного номера, т.е. пропуская метафайлы.
+                int mftEntry = SystemConstants.ServiceFileCount;
+                br.BaseStream.Seek(mftEntry * SystemConstants.MftRecordSize, SeekOrigin.Begin);
+                while (mftEntry * SystemConstants.MftRecordSize < mftItselfHeader.Size)
+                {
+                    if (br.ReadByte() == (byte)MftHeader.Signature.NotUsed)
+                        return mftEntry;
+                    br.BaseStream.Seek(SystemConstants.MftRecordSize - 1, SeekOrigin.Current);
+                    mftEntry++;
+                }
+
+                // Проверяем, будет ли главный файл MFT помещаться в MFT зону,
+                // если увечилить его размер ещё на одну запись.
+                if ((mftEntry + 1) * SystemConstants.MftRecordSize <= SystemData.MftAreaSize)
+                    return mftEntry;
+                return -1;
+            }
         }
 
-        static int GetDirectoryArea(int blockCount)
+        static int GetNewRecordPositionInDirectory(DataAttributes directoryData)
         {
-            if (blockCount == 0)
-                return SystemConstants.MftRecordSize - MftHeader.Length - 1;
-            return blockCount * SystemData.BytesPerCluster;
+            using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
+            {
+                int offset = 0;
+                if (directoryData.Blocks.Count == 0)
+                {
+                    br.BaseStream.Seek(directoryData.MftEntry * SystemConstants.MftRecordSize + MftHeader.Length, SeekOrigin.Begin);
+                    while (offset < directoryData.Size)
+                    {
+                        if (br.ReadBytes(RootRecord.Length).SequenceEqual(new byte[RootRecord.Length]))
+                            return offset;
+                        offset += RootRecord.Length;
+                    }
+
+                    if (offset + RootRecord.Length <= SystemConstants.MftRecordSize - MftHeader.Length)
+                        return offset;
+                }
+                else
+                {
+                    int blockIndex = 0;
+                    while (offset < directoryData.Size)
+                    {
+                        List<byte> recordBytes = new List<byte>();
+                        if (SystemData.BytesPerCluster - offset % SystemData.BytesPerCluster >=
+                            RootRecord.Length)
+                        {
+                            br.BaseStream.Seek(
+                                directoryData.Blocks[blockIndex] * SystemData.BytesPerCluster +
+                                offset % SystemData.BytesPerCluster,
+                                SeekOrigin.Begin);
+                            recordBytes.AddRange(br.ReadBytes(RootRecord.Length));
+                        }
+                        else
+                        {
+                            recordBytes.AddRange(
+                                br.ReadBytes(SystemData.BytesPerCluster - offset % SystemData.BytesPerCluster));
+                            br.BaseStream.Seek(directoryData.Blocks[++blockIndex] * SystemData.BytesPerCluster,
+                                SeekOrigin.Begin);
+                            recordBytes.AddRange(br.ReadBytes(RootRecord.Length - recordBytes.Count));
+                        }
+
+                        if (recordBytes.ToArray().SequenceEqual(new byte[RootRecord.Length]))
+                            return offset;
+                        offset += RootRecord.Length;
+                    }
+
+                    if (offset + RootRecord.Length <= directoryData.Blocks.Count * RootRecord.Length)
+                        return offset;
+                }
+
+                return -1;
+            }
         }
 
         private static void ShiftMftDataToFileArea(int mftEntry, int dataSize, int block)
@@ -604,18 +685,19 @@ namespace MyOS
         public static int CreateFile(MftHeader file, Path path)
         {
             // проверка на права
-            int mftRecordNumber = GetNewMftRecordNumber();
-            if (!HasMemoryToAddRecord(mftRecordNumber, SystemConstants.MftRecordSize, SystemData.MftAreaSize))
-                return -1;
+            int mftRecordNumber = GetNewMftEntry();
+            if (mftRecordNumber == -1) return -1;
 
             int directoryMftEntry = FindDirectoryMftEntry(path);
             DataAttributes directoryData = ReadDataAttributes(directoryMftEntry);
 
             bool needNewDataBlock = false;
-            if (GetDirectoryArea(directoryData.Blocks.Count) - directoryData.Size < RootRecord.Length)
+            int filePosition = GetNewRecordPositionInDirectory(directoryData);
+            if (filePosition == -1)
             {
                 if (SystemData.FreeClusters == 0) return -1;
                 needNewDataBlock = true;
+                filePosition = directoryData.Size;
             }
 
             // Проверяем, не существует ли уже файл с таким именем.
@@ -623,15 +705,7 @@ namespace MyOS
             if (record != null)
                 return record.Attributes == (record.Attributes | (byte)MftHeader.Attribute.Directory) ? -2 : -3;
 
-            UpdateMftEntry(file, mftRecordNumber);
-
-            //DataAttributes mftData = ReadDataAttributes(SystemConstants.MftRecNumber);
-            //mftData.Size += SystemConstants.MftRecordSize;
-            //mftData.Blocks.Add(mftRecordNumber);
-            MftHeader mft = GetMftHeader(SystemConstants.MftRecNumber);
-            mft.Size += SystemConstants.MftRecordSize;
-            UpdateMftEntry(mft, SystemConstants.MftRecNumber);
-
+            
             if (needNewDataBlock)
             {
                 int newBlock = GetFreeClusters(1)[0];
@@ -639,11 +713,27 @@ namespace MyOS
                 if (directoryData.Blocks.Count == 0)
                     ShiftMftDataToFileArea(directoryMftEntry, directoryData.Size, newBlock);
                 directoryData.Blocks.Add(newBlock);
+                if(filePosition == directoryData.Size)
+                    directoryData.Size += RootRecord.Length;
+                WriteData(directoryData, null);
             }
-            directoryData.Size += RootRecord.Length;
+            
+            UpdateMftEntry(file, mftRecordNumber);
 
-            WriteData(directoryData, null);
-            UpdateDirectoryRecord(directoryData, directoryData.Size - RootRecord.Length, new RootRecord(file, mftRecordNumber));
+            MftHeader mft = GetMftHeader(SystemConstants.MftRecNumber);
+            if (mftRecordNumber * SystemConstants.MftRecordSize == mft.Size)
+            {
+                mft.Size += SystemConstants.MftRecordSize;
+                UpdateMftEntry(mft, SystemConstants.MftRecNumber);
+            }
+
+            MftHeader directoryMftHeader = GetMftHeader(directoryMftEntry);
+            directoryMftHeader.ModificationDate = new MyDateTime(DateTime.Now);
+            if (filePosition == directoryData.Size)
+                directoryMftHeader.Size += RootRecord.Length;
+            UpdateMftEntry(directoryMftHeader, directoryMftEntry);
+
+            UpdateDirectoryRecord(directoryData, filePosition, new RootRecord(file, mftRecordNumber));
 
             return mftRecordNumber;
         }
@@ -661,10 +751,9 @@ namespace MyOS
             RootRecord bufferRecord = new RootRecord
             {
                 Attributes = record.Attributes,
-                CreadtionDate = record.CreadtionDate,
+                CreationDate = record.CreadtionDate,
                 Extension = extension,
                 FileName = fileName,
-                Size = record.Size,
                 Number = GetFileInDirectory(directoryMtfEntry, GetFilePosition(fileName, extension, directoryMtfEntry)).Number
             };
 
@@ -675,7 +764,8 @@ namespace MyOS
         {
             List<RootRecord> copyList = new List<RootRecord>();
             int filePosition = 0;
-            while (filePosition < sourceDirectory.Size)
+            MftHeader sourceDirectoryHeader = GetMftHeader(sourceDirectory.Number);
+            while (filePosition < sourceDirectoryHeader.Size)
             {
                 RootRecord sourceFile = GetFileInDirectory(sourceDirectory.Number, filePosition);
                 MftHeader fileCopy = GetMftHeader(sourceFile.Number);
@@ -878,12 +968,16 @@ namespace MyOS
                 }
             }
             else if (requiredClusterCount < 0)
+            {
+                SetClustersState(fileDataAttributes.Blocks.GetRange(fileDataAttributes.Blocks.Count + requiredClusterCount,
+                    Math.Abs(requiredClusterCount)), SystemConstants.ClusterState.Free);
                 fileDataAttributes.Blocks.RemoveRange(fileDataAttributes.Blocks.Count + requiredClusterCount,
                     Math.Abs(requiredClusterCount));
+            }
 
             MftHeader file = GetMftHeader(buffer.Record.Number);
             file.ModificationDate = new MyDateTime(DateTime.Now);
-            file.Size = fileDataAttributes.Size = buffer.Record.Size = data.Length;
+            file.Size = fileDataAttributes.Size = data.Length;
 
             UpdateMftEntry(file, buffer.Record.Number);
             WriteData(fileDataAttributes, data.GetFormatBytes(data.Length));
@@ -892,136 +986,57 @@ namespace MyOS
             UpdateDirectoryRecord(ReadDataAttributes(directoryMftEntry), filePosition, buffer.Record);
         }
 
-        public static void Delete(Path path, FileRecord record)
+        public static void Delete(Path path, RootRecord record)
         {
-            //int dotIndex = record.FileName.LastIndexOf('.');
-            //string extension = dotIndex == -1 || record.Attributes ==
-            //                   (record.Attributes | (byte)MftHeader.Attribute.Directory)
-            //    ? ""
-            //    : record.FileName.Substring(dotIndex + 1, record.FileName.Length - dotIndex - 1);
-            //string fileName =
-            //    record.FileName.Substring(0, extension.Length > 0 ? record.FileName.Length - extension.Length - 1 : record.FileName.Length);
-            //RootRecord file = new RootRecord()
-            //{
-            //    Attributes = record.Attributes,
-            //    CreadtionDate = record.CreadtionDate,
-            //    Extension = extension,
-            //    FileName = fileName,
-            //    Size = record.Size,
-            //    Number = FindFileRecord(fileName, extension, GetDirectoryMftRecordNumber(path)).Number
-            //};
+            if (record.Attributes == (record.Attributes | (byte) MftHeader.Attribute.Directory))
+                DeleteRecursively(record);
 
-            //using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
-            //{
-            //    DeleteRecursively(br, path, file);
-            //}
+            // удаляем запись в родительской директории
+            int directoryMftEntry = FindDirectoryMftEntry(new Path(path));
+            int filePosition = GetFilePosition(record.FileName, record.Extension, directoryMftEntry);
+            UpdateDirectoryRecord(ReadDataAttributes(directoryMftEntry), filePosition, null);
+            
+            // Очищаем кластеры
+            DataAttributes recordData = ReadDataAttributes(record.Number);
+            SetClustersState(recordData.Blocks, SystemConstants.ClusterState.Free);
+
+            // Ставим пометку о неиспользуемой записи mft
+            UpdateMftEntry(null, record.Number);
+
+            //изменяем размер и время последней модификации родительской директории
+            MftHeader directoryHeader = GetMftHeader(directoryMftEntry);
+            directoryHeader.ModificationDate = new MyDateTime(DateTime.Now);
+            UpdateMftEntry(directoryHeader, directoryMftEntry);
         }
 
-        static void DeleteRecursively(BinaryReader br, Path path, RootRecord record)
+        static int DeleteRecursively(RootRecord directory)
         {
-            //if (record.Attributes == (record.Attributes | (byte)MftHeader.Attribute.Directory))
-            //{ // Если каталог - спускаемся вниз по иерархии каталогов.
-            //    List<string> childDirectoryList = new List<string>(path.DirectoriesList);
-            //    childDirectoryList.Add(record.FileName);
-            //    DeleteRecursively(br, new Path(childDirectoryList), record);
-            //}
-            //// Получаем запись Mft
-            //MftHeader headerInMft = GetMftRecord(record.Number);
-            ////recordInMft.Size -= SystemConstants.MftRecordSize;
-            //// Очищаем кластеры
-            //SetClustersState(headerInMft.Data.ToArray(), SystemConstants.ClusterState.Free);
-            //BinaryWriter bw = new BinaryWriter(br.BaseStream);
-            //bw.BaseStream.Seek(record.Number * SystemConstants.MftRecordSize, SeekOrigin.Begin);
-            //// Ставим признак неиспользуемой Mft-записи
-            //bw.Write((byte)MftHeader.Signature.NotUsed);
-            ////record.Size -= RootRecord.Length;
+            int totalFileCount = 0;
+            int filePosition = 0;
+            MftHeader sourceDirectoryHeader = GetMftHeader(directory.Number);
+            while (filePosition < sourceDirectoryHeader.Size)
+            {
+                RootRecord file = GetFileInDirectory(directory.Number, filePosition);
+                
+                if (file.Attributes == (file.Attributes | (byte)MftHeader.Attribute.Directory))
+                    totalFileCount += DeleteRecursively(file);
+                else
+                {
+                    UpdateDirectoryRecord(ReadDataAttributes(file.Number), filePosition, null);
+                    
+                    // Очищаем кластеры
+                    DataAttributes recordData = ReadDataAttributes(file.Number);
+                    SetClustersState(recordData.Blocks, SystemConstants.ClusterState.Free);
+
+                    // Ставим пометку о неиспользуемой записи mft
+                    UpdateMftEntry(null, file.Number);
+                }
+                
+                filePosition += RootRecord.Length;
+                totalFileCount++;
+            }
+
+            return totalFileCount;
         }
     }
 }
-
-//public static int HasFileWithSuchName(string newFileName, string newFileExtension, int directoryRecordNumberInMft)
-//{
-//    using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
-//    {
-//        if (directoryRecordNumberInMft > 0)
-//        {
-//            // Перемещаемся на запись каталога, в котором пользователь хочет создать файл.
-//            br.BaseStream.Seek(directoryRecordNumberInMft * SystemConstants.MftRecordSize, SeekOrigin.Begin);
-//            MftRecord destinationDirectory = ReadMftRecord(br);
-
-//            if (destinationDirectory.Data.Count == 0)
-//            {
-//                int currentOffset = 0;
-//                for (int i = 0; i < destinationDirectory.Size; i += RootRecord.Length)
-//                {
-//                    RootRecord file = ReadRootRecord(br);
-//                    if (newFileName == file.FileName && newFileExtension == file.Extension)
-//                        return currentOffset;
-//                }
-//                return -1;
-//            }
-//            else
-//            {
-//                int currentOffset = 0;
-//                for (int i = 0; i < destinationDirectory.Data.Count - 1; i++)
-//                {
-//                    if (currentOffset < destinationDirectory.Size)
-//                    {
-//                        List<byte> recordBytes = new List<byte>();
-//                        if (currentOffset % (SystemData.BytesPerCluster + 1) >=
-//                            RootRecord.Length)
-//                        {
-//                            br.BaseStream.Seek(destinationDirectory.Data[i] * SystemData.BytesPerCluster,
-//                                SeekOrigin.Begin);
-//                            recordBytes.AddRange(br.ReadBytes(RootRecord.Length));
-//                        }
-//                        else
-//                        {
-//                            recordBytes.AddRange(
-//                                br.ReadBytes(currentOffset % (SystemData.BytesPerCluster + 1)));
-//                            br.BaseStream.Seek(destinationDirectory.Data[++i] * SystemData.BytesPerCluster,
-//                                SeekOrigin.Begin);
-//                            recordBytes.AddRange(
-//                                br.ReadBytes(RootRecord.Length - recordBytes.Count));
-//                        }
-
-//                        RootRecord file = new RootRecord(recordBytes.ToArray());
-//                        if (newFileName == file.FileName && newFileExtension == file.Extension)
-//                            return currentOffset;
-//                        currentOffset += RootRecord.Length;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    return -1;
-
-//}
-
-
-
-
-//private static void ShiftDataToNewMftRecord(int lastMftRecordNumber, int dataSize, int newMftRecordNumber)
-//{
-//byte[] dataBytes;
-//    using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
-//{
-//    br.BaseStream.Seek(
-//        lastMftRecordNumber * SystemConstants.MftRecordSize + MftHeader.Length + 1,
-//        SeekOrigin.Begin);
-//    dataBytes = br.ReadBytes(dataSize);
-//}
-
-//using (BinaryWriter bw = new BinaryWriter(File.Open(SystemConstants.SystemFile, FileMode.Open)))
-//{
-//bw.BaseStream.Seek(
-//lastMftRecordNumber * SystemConstants.MftRecordSize + MftHeader.Length + 1,
-//SeekOrigin.Begin);
-//for (int i = 0; i < dataSize; i++)
-//bw.Write(0);
-
-//bw.BaseStream.Seek(newMftRecordNumber * SystemConstants.MftRecordSize, SeekOrigin.Begin);
-//bw.Write((byte)MftRecord.Signature.IsData);
-//bw.Write(dataBytes);
-//}
-//}

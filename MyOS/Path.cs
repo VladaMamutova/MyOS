@@ -7,9 +7,7 @@ namespace MyOS
 {
     public class Path :INotifyPropertyChanged
     {
-        public static readonly char VolumeName;
-        public static readonly string Root;
-        public const char Separator = '/';
+        private const char Separator = '/';
         public List<string> DirectoriesList;
         private string _fullPath;
         public string CurrentPath
@@ -29,30 +27,17 @@ namespace MyOS
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
-
-        static Path()
-        {
-            using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
-            {
-                br.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + MftHeader.Length, SeekOrigin.Begin);
-                if (br.ReadByte() == 0) // Данные записи помещаютс в поле данных одной Mft-записи.
-                    VolumeName = br.ReadChar();
-                br.BaseStream.Seek(SystemConstants.RootDirectoryRecNumber * SystemConstants.MftRecordSize, SeekOrigin.Begin);
-            }
-            MftHeader root = SystemCalls.GetMftHeader(SystemConstants.RootDirectoryRecNumber);
-            Root = root.FileName; // Удаляем символ $, с которого начинаются все системные файлы.
-        }
-
+        
         public Path()
         {
             DirectoriesList = new List<string>();
-            CurrentPath = VolumeName + ":" + Root + string.Join(Separator.ToString(), DirectoriesList);
+            CurrentPath = SystemData.VolumeName + ":" + SystemData.Root + string.Join(Separator.ToString(), DirectoriesList);
         }
 
         public Path(List<string> directories)
         {
             DirectoriesList = new List<string>(directories);
-            CurrentPath = VolumeName + ":" + Root + string.Join(Separator.ToString(), DirectoriesList);
+            CurrentPath = SystemData.VolumeName + ":" + SystemData.Root + string.Join(Separator.ToString(), DirectoriesList);
         }
 
         public Path(Path path)
@@ -64,7 +49,7 @@ namespace MyOS
         public void Add(string directory)
         {
             DirectoriesList.Add(directory);
-            CurrentPath = VolumeName + ":" + Root + string.Join(Separator.ToString(), DirectoriesList);
+            CurrentPath = SystemData.VolumeName + ":" + SystemData.Root + string.Join(Separator.ToString(), DirectoriesList);
         }
 
         public void GetPreviosFolder()
@@ -72,7 +57,7 @@ namespace MyOS
             if (DirectoriesList.Count > 0)
             {
                 DirectoriesList.RemoveAt(DirectoriesList.Count - 1);
-                CurrentPath = VolumeName + ":" + Root + string.Join(Separator.ToString(), DirectoriesList);
+                CurrentPath = SystemData.VolumeName + ":" + SystemData.Root + string.Join(Separator.ToString(), DirectoriesList);
             }
         }
     }

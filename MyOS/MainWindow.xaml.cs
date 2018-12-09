@@ -154,6 +154,7 @@ namespace MyOS
         {
             SystemCalls.Paste((Path)CurrentDirectory.DataContext);
             UpdateFileTable();
+            FreeClusters.Content = SystemData.FreeClusters;
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
@@ -164,7 +165,8 @@ namespace MyOS
             int dotIndex = file.FullName.LastIndexOf('.');
             //проверка на длину имени и расширения
             string fileName, extension;
-            if (dotIndex == -1)
+            if (dotIndex == -1 || file.Attributes ==
+                (file.Attributes | (byte)MftHeader.Attribute.Directory))
             {
                 fileName = file.FullName;
                 extension = "";
@@ -180,10 +182,10 @@ namespace MyOS
             RootRecord bufferRecord = new RootRecord
             {
                 Attributes = file.Attributes,
-                CreadtionDate = file.CreadtionDate,
+                CreationDate = file.CreadtionDate,
                 Extension = extension,
                 FileName = fileName,
-                Size = file.Size,
+                //Size = file.Size,
                 Number = record.Number
             };
 
@@ -199,12 +201,13 @@ namespace MyOS
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is FileRecord file)) return;
 
-            FileCreationWindow fileCreation = new FileCreationWindow("Переименование файла");
-            fileCreation.FileName.Text = file.FullName;
+            FileCreationWindow fileCreation =
+                new FileCreationWindow("Переименование файла") {FileName = {Text = file.FullName}};
             int dotIndex = file.FullName.LastIndexOf('.');
             //проверка на длину имени и расширения
             string prevName, prevExtension;
-            if (dotIndex == -1)
+            if (dotIndex == -1 || file.Attributes ==
+                (file.Attributes | (byte)MftHeader.Attribute.Directory))
             {
                 prevName = fileCreation.FileName.Text;
                 prevExtension = "";
@@ -242,7 +245,26 @@ namespace MyOS
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is FileRecord file)) return;
 
-            //SystemCalls.Delete((Path)CurrentDirectory.DataContext, file);
+            int dotIndex = file.FullName.LastIndexOf('.');
+            string extension = dotIndex == -1 || file.Attributes ==
+                               (file.Attributes | (byte)MftHeader.Attribute.Directory)
+                ? ""
+                : file.FullName.Substring(dotIndex + 1);
+            string fileName =
+                file.FullName.Substring(0, extension.Length > 0 ? file.FullName.Length - extension.Length - 1 : file.FullName.Length);
+            int directoryMftEntry = SystemCalls.FindDirectoryMftEntry((Path) CurrentDirectory.DataContext);
+            RootRecord record = new RootRecord()
+            {
+                Attributes = file.Attributes,
+                CreationDate = file.CreadtionDate,
+                Extension = extension,
+                FileName = fileName,
+                //Size = file.Size,
+                Number = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(fileName, extension, directoryMftEntry)).Number
+            };
+            SystemCalls.Delete((Path)CurrentDirectory.DataContext, record);
+            UpdateFileTable();
+            FreeClusters.Content = SystemData.FreeClusters;
         }
     }
 }

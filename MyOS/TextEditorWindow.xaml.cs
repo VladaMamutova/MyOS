@@ -26,6 +26,7 @@ namespace MyOS
         {
             SystemCalls.SaveFile(_buffer, FileContent.Text);
             ((MainWindow)Owner).UpdateFileTable();
+            ((MainWindow)Owner).FreeClusters.Content = SystemData.FreeClusters;
         }
     }
 }

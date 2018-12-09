@@ -3,9 +3,10 @@ using System.Text;
 
 namespace MyOS
 {
-    static class SystemData
+    class SystemData
     {
         public static readonly char VolumeName;
+        public static readonly char Root;
         public static readonly string FileSystemVersion;
         public static readonly byte State;
         public const int VolumeSize = 419430400; // Размер раздела с операционной системой.
@@ -14,7 +15,7 @@ namespace MyOS
 
         public const ushort BytesPerCluster = 4096; // Размер кластера в байтах.
 
-         public static SystemBuffer Buffer;
+        public static SystemBuffer Buffer;
         public static int FreeClusters;
 
         static SystemData()
@@ -22,13 +23,11 @@ namespace MyOS
             using (BinaryReader br = new BinaryReader(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
                 br.BaseStream.Seek(SystemConstants.VolumeRecNumber * SystemConstants.MftRecordSize + MftHeader.Length, SeekOrigin.Begin);
-                if (br.ReadByte() == 0) // Данные записи помещаютс в поле данных одной Mft-записи.
-                {
-                    VolumeName = br.ReadChar();
-                    FileSystemVersion = Encoding.UTF8.GetString(br.ReadBytes(9));
-                    State = br.ReadByte();
-                    
-                }
+                VolumeName = br.ReadChar();
+                FileSystemVersion = Encoding.UTF8.GetString(br.ReadBytes(9));
+                State = br.ReadByte();
+                br.BaseStream.Seek(SystemConstants.RootDirectoryRecNumber * SystemConstants.MftRecordSize + 2, SeekOrigin.Begin);
+                Root = br.ReadChar();
             }
             InitializeFreeClusters();
         }

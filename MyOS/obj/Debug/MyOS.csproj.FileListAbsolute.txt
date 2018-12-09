@@ -1,7 +1,6 @@
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\bin\Debug\MyOS.exe.config
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\bin\Debug\MyOS.exe
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\bin\Debug\MyOS.pdb
-F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.csprojAssemblyReference.cache
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MainWindow.g.cs
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\App.g.cs
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS_MarkupCompile.cache
