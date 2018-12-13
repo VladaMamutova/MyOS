@@ -8,7 +8,7 @@ namespace MyOS
     /// </summary>
     public partial class TextEditorWindow
     {
-        public TextEditorWindow(RootRecord file, string content, Path path)
+        public TextEditorWindow(DirectoryRecord file, string content, Path path)
         {
             InitializeComponent();
             Title = file.FileName + (file.Extension.Length == 0 ? "" : '.' + file.Extension);
@@ -26,7 +26,7 @@ namespace MyOS
         {
             SystemCalls.SaveFile(_buffer, FileContent.Text);
             ((MainWindow)Owner).UpdateFileTable();
-            ((MainWindow)Owner).FreeClusters.Content = SystemData.FreeClusters;
+            ((MainWindow)Owner).FreeClusters.Content = Bitmap.FreeClusters;
         }
     }
 }

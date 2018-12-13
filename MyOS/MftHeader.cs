@@ -10,13 +10,13 @@ namespace MyOS
     public class MftHeader
     {
         public const int Length = 50;
+
         // Перечисление признаков записи.
         public enum Signature : byte
         {
             NotUsed = 0,
             InUse = 1,
-            IsAccessControlList = 2,
-            IsData = 3
+            IsData = 2
         }
 
         [Flags]
@@ -28,6 +28,7 @@ namespace MyOS
             ReadOnly = 0b1,
             None = 0
         }
+
         public Signature Sign { get; set; } // Признак записи.
         public string FileName { get; set; } // Имя файла.
         public byte Attributes { get; set; } // Атрибуты.
@@ -35,10 +36,22 @@ namespace MyOS
         public int Size { get; set; } // Размер.
         public MyDateTime CreationDate { get; set; } // Дата создания файла.
         public MyDateTime ModificationDate { get; set; } // Дата последней модификации файла.
-        public byte UserId { get; set; } // Уникальный идентификатор владельца файла.
-        public Permissions Permissions { get; set; } // Дескриптор безопасности.
+        public byte UserId { get; } // Уникальный идентификатор владельца файла.
+        public Permission Permission { get; set; } // Права на файл.
 
-        public MftHeader() { }
+        //public MftHeader() { }
+
+        public MftHeader(string fileName, string extension = "", int size = 0, Attribute attributes = Attribute.None)
+        {
+            Sign = Signature.InUse;
+            FileName = fileName;
+            Attributes = (byte) attributes;
+            Extension = extension;
+            Size = size;
+            CreationDate = ModificationDate = new MyDateTime(DateTime.Now);
+            UserId = Account.User.Id;
+            Permission = new Permission(Account.User.Id == User.AdministratorId ? Permission.UserSign.Administrator : Permission.UserSign.Owner);
+        }
 
         public MftHeader(byte[] recordHeader)
         {
@@ -50,23 +63,37 @@ namespace MyOS
             CreationDate = new MyDateTime(recordHeader.GetRange(37, 5));
             ModificationDate = new MyDateTime(recordHeader.GetRange(42, 5));
             UserId = recordHeader[47];
-            Permissions = new Permissions(recordHeader.GetRange(48, 2));
+            Permission = new Permission(recordHeader.GetRange(48, 2));
         }
 
         public byte[] GetBytes()
         {
-            List<byte> headerBytes = new List<byte>();
-            headerBytes.Add((byte)Sign);
-            headerBytes.Add(Attributes);
+            List<byte> headerBytes = new List<byte>
+                { (byte) Sign, Attributes};
             headerBytes.AddRange(FileName.GetFormatBytes(26));
             headerBytes.AddRange(Extension.GetFormatBytes(5));
             headerBytes.AddRange(BitConverter.GetBytes(Size));
             headerBytes.AddRange(CreationDate.DateTimeBytes);
             headerBytes.AddRange(ModificationDate.DateTimeBytes);
             headerBytes.Add(UserId);
-            headerBytes.AddRange(Permissions.PermissionBytes);            
+            headerBytes.AddRange(Permission.GetBytes());            
             return headerBytes.ToArray();
-
         }
+
+        public bool HasPermissions(byte uid, Permission.Rights rights)
+        {
+            if (Permission.CheckRights(uid == User.AdministratorId ? Permission.UserSign.Administrator :
+                uid == UserId ? Permission.UserSign.Owner : Permission.UserSign.Other, rights))
+                return true;
+            return false;
+        }
+        public string GetFullName()
+        {
+            return FileName + (Extension != "" ? "." + Extension : "");
+        }
+
+        public bool IsDirectory() => Attributes == (Attributes | (byte) Attribute.Directory);
+        public bool IsHidden() => Attributes == (Attributes | (byte)Attribute.Hidden);
+        public bool IsReadOnly() => Attributes == (Attributes | (byte)Attribute.ReadOnly);
     }
 }

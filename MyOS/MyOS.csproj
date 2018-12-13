@@ -36,6 +36,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -45,9 +47,11 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -55,32 +59,43 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AccessControlList.cs" />
+    <Compile Include="Account.cs" />
+    <Compile Include="Bitmap.cs" />
     <Compile Include="Buffer.cs" />
     <Compile Include="DataAttributes.cs" />
-    <Compile Include="FileCreationWindow.xaml.cs">
+    <Compile Include="Windows\FileCreationWindow.xaml.cs">
       <DependentUpon>FileCreationWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="FileOffsetInDirectory.cs" />
+    <Compile Include="Windows\PropertiesWindow.xaml.cs">
+      <DependentUpon>PropertiesWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Path.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FileRecord.cs" />
+    <Compile Include="ExplorerFile.cs" />
     <Compile Include="HashEncryptor.cs" />
     <Compile Include="MftHeader.cs" />
     <Compile Include="MyDateTime.cs" />
-    <Compile Include="Permissions.cs" />
-    <Compile Include="RootRecord.cs" />
+    <Compile Include="Permission.cs" />
+    <Compile Include="DirectoryRecord.cs" />
     <Compile Include="SystemCalls.cs" />
     <Compile Include="SystemData.cs" />
     <Compile Include="SystemConstants.cs" />
-    <Compile Include="TextEditorWindow.xaml.cs">
+    <Compile Include="Windows\LoginWindow.xaml.cs">
+      <DependentUpon>LoginWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\TextEditorWindow.xaml.cs">
       <DependentUpon>TextEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="User.cs" />
-    <Page Include="FileCreationWindow.xaml">
+    <Page Include="Windows\FileCreationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Windows\LoginWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -88,11 +103,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="TextEditorWindow.xaml">
+    <Page Include="Windows\PropertiesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\TextEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -122,6 +141,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\file.png" />
+    <Resource Include="Resources\file1.png" />
+    <Resource Include="Resources\folder.png" />
+    <Resource Include="Resources\folder1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

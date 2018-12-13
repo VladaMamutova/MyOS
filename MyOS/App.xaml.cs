@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Windows;
 
 namespace MyOS
@@ -11,7 +6,20 @@ namespace MyOS
     /// <summary>
     /// Логика взаимодействия для App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            MainWindow = new MainWindow();
+
+            if (!File.Exists(SystemConstants.SystemFile))
+                SystemCalls.Formatting();
+
+            LoginWindow loginWindow = new LoginWindow();
+            if (loginWindow.ShowDialog() == true)
+                MainWindow.ShowDialog();
+            else MainWindow.Close();
+        }
     }
 }

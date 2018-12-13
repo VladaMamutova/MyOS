@@ -8,6 +8,7 @@ namespace MyOS
     public struct MyDateTime
     {
         public byte[] DateTimeBytes;
+        public static readonly MyDateTime MinValue = new MyDateTime(new byte[5]);
 
         public MyDateTime(byte[] dateTimeBytes)
         {
@@ -71,7 +72,16 @@ namespace MyOS
 
         public override string ToString()
         {
+            return GetDate() + $" {GetHour():d2}:{GetMinute():d2}";
+        }
+
+        public string GetFullDateTime()
+        {
             return $"{GetDay():d2}.{GetMonth():d2}.{GetYear()} {GetHour():d2}:{GetMinute():d2}:{GetSecond():d2}";
         }
+
+        public string GetDate() => $"{GetDay():d2}.{GetMonth():d2}.{GetYear()}";
+
+        public string GetTime() => $"{GetHour():d2}:{GetMinute():d2}:{GetSecond():d2}";
     }
 }

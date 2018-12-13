@@ -3,6 +3,6 @@
     class SystemBuffer
     {
         public Path Path;
-        public RootRecord Record;
+        public DirectoryRecord Record;
     }
 }

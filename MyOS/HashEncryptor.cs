@@ -6,6 +6,11 @@ namespace MyOS
 {
     static class HashEncryptor
     {
+        public static byte[] ComputeHash(this string password)
+        {
+            return SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes(password));
+        }
+
         /// <summary>
         /// Генерирует случайную соль.
         /// </summary>

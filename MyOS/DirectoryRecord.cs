@@ -8,7 +8,7 @@ namespace MyOS
     /// <summary>
     /// Запись корневого каталога.
     /// </summary>
-    public class RootRecord
+    public class DirectoryRecord
     {
         public const int Length = 41;
         public string FileName { get; set; } // Имя файла.
@@ -22,9 +22,9 @@ namespace MyOS
 
         //static RootRecord() { Empty = new RootRecord(new byte[Length]); }
 
-        public RootRecord() { }
+        public DirectoryRecord() { }
 
-        public RootRecord(byte[] recordBytes)
+        public DirectoryRecord(byte[] recordBytes)
         {
             if (recordBytes.Length != Length) return;
             FileName = Encoding.UTF8.GetString(recordBytes.GetRange(0, 26)).Trim('\0');
@@ -35,7 +35,7 @@ namespace MyOS
             Number = recordBytes.GetRange(37, 4).ToInt32();
         }
 
-        public RootRecord(MftHeader mftEntry, int mftEntryNumber)
+        public DirectoryRecord(MftHeader mftEntry, int mftEntryNumber)
         {
             FileName = mftEntry.FileName;
             Attributes = mftEntry.Attributes;
@@ -64,7 +64,7 @@ namespace MyOS
 
         public bool IsEmpty()
         {
-            RootRecord empty = new RootRecord(new byte[Length]);
+            DirectoryRecord empty = new DirectoryRecord(new byte[Length]);
             if (FileName != empty.FileName) return false;
             if (Attributes != empty.Attributes) return false;
             if (Extension != empty.Extension) return false;

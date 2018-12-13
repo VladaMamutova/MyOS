@@ -14,13 +14,50 @@ namespace MyOS
         public MainWindow()
         {
             InitializeComponent();
-            CurrentDirectory.DataContext = new Path();
-            UpdateFileTable();
+        }
+
+        public struct FileInfo
+        {
+            public bool Attributes { get; set; } // Атрибуты.
+            public bool FullName { get; set; } // Имя файла с расширением.
+            public bool CreadtionDate { get; set; } // Дата создания.
+            public bool ModificationDate { get; set; } // Дата создания.
+            public bool Size { get; set; } // Размер файла.   
         }
         
+
+        private void ShowMenu(object sender, RoutedEventArgs e)
+        {
+            Menu.Visibility = Menu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void ShowInfo_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTable.CurrentCell.Item is DataGridCellInfo ||
+                !(FileTable.SelectedItem is ExplorerFile file)) return;
+            //Установка иконки
+            PropertiesWindow propertiesWindow = new PropertiesWindow(SystemCalls.GetMftHeader(file.MftEntry));
+            propertiesWindow.ShowDialog();
+        }
+
         public void UpdateFileTable()
         {
+            //List<FileRecord> files= SystemCalls.GetFileList((Path)CurrentDirectory.DataContext);
+            //ObservableCollection<ExplorerFile> fileList = new ObservableCollection<ExplorerFile>();
+            //for (int i = 0; i < fileList.Count; ++i)
+            //{
+            //    fileList.Add(new ExplorerFile() { Name = m_pFields.Field[i].AliasName, Value = DisplayedValueForRow(i), Index = i });
+            //}
+
+            //// Set ItemSource to populate grid
+            //addressGrid.ItemsSource = propertyList;
             FileTable.ItemsSource = SystemCalls.GetFileList((Path)CurrentDirectory.DataContext);
+        }
+
+        private void Sign_Click(object sender, RoutedEventArgs e)
+        {
+            LoginWindow loginWindow = new LoginWindow();
+            loginWindow.ShowDialog();
         }
 
         private void Create_Click(object sender, RoutedEventArgs e)
@@ -28,16 +65,8 @@ namespace MyOS
             SystemCalls.Formatting();
             CurrentDirectory.DataContext = new Path();
             CurrentDirectory.Content = ((Path)CurrentDirectory.DataContext).CurrentPath;
-            SystemData.InitializeFreeClusters();
+            Bitmap.InitializeFreeClusters();
             UpdateFileTable();
-        }
-
-        private void TestMyDateTime_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime now = DateTime.Now;
-            MyDateTime myDateTimeNow = new MyDateTime(now);
-            MessageBox.Show("DateTime.Now: " + now + Environment.NewLine +
-                            "MyDateTime: " + myDateTimeNow + " (" + myDateTimeNow.GetStringUtcHours() + ")");
         }
 
         private string GetErrorMessage(int error, string name, string extension)
@@ -73,19 +102,8 @@ namespace MyOS
                 extension = fileCreation.FileName.Text.Substring(dotIndex + 1);
             }
 
-            MyDateTime now = new MyDateTime(DateTime.Now);
-            MftHeader newFile = new MftHeader
-            {
-                Sign = MftHeader.Signature.InUse,
-                FileName = name,
-                Attributes = (byte)MftHeader.Attribute.None,
-                Extension = extension,
-                Size = 0,
-                CreationDate = now,
-                ModificationDate = now,
-                UserId = new byte(),
-                Permissions = new Permissions(new byte[] { 0, 0 })
-            };
+            MftHeader newFile = new MftHeader(name, extension);
+
             string error = GetErrorMessage(SystemCalls.CreateFile(newFile, (Path)CurrentDirectory.DataContext), name, extension);
             if (error != null)
                 MessageBox.Show(error, "Ошибка создания файла!", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -94,7 +112,7 @@ namespace MyOS
             //{
             //    if (i == 1)
             //        MessageBox.Show("");
-            //    SystemCalls.CreateFile("file" + (i + 1), "txt", (Path)CurrentDirectory.DataContext);
+            //    SystemCalls.CreateFile(new MftHeader("file" + (i + 1), "txt"), (Path)CurrentDirectory.DataContext);
             //}
             UpdateFileTable();
         }
@@ -103,36 +121,26 @@ namespace MyOS
         {
             FileCreationWindow fileCreation = new FileCreationWindow("Создание папки");
             fileCreation.ShowDialog();
-            MyDateTime now = new MyDateTime(DateTime.Now);
-            MftHeader newFile = new MftHeader
-            {
-                Sign = MftHeader.Signature.InUse,
-                FileName = fileCreation.FileName.Text,
-                Attributes = (byte)MftHeader.Attribute.Directory,
-                Extension = "",
-                Size = 0,
-                CreationDate = now,
-                ModificationDate = now,
-                UserId = new byte(),
-                Permissions = new Permissions(new byte[] { 0, 0 })
-            };
-            string error = GetErrorMessage(SystemCalls.CreateFile(newFile, (Path) CurrentDirectory.DataContext),
-                newFile.FileName, newFile.Extension);
-            if (error != null)
-                MessageBox.Show(error, "Ошибка создания файла!", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            MftHeader newFile = new MftHeader(fileCreation.FileName.Text, attributes: MftHeader.Attribute.Directory);
+            int result = SystemCalls.CreateFile(newFile, (Path) CurrentDirectory.DataContext);
+            string error = GetErrorMessage(result, newFile.FileName, newFile.Extension);
+            if (error != null) MessageBox.Show(error, "Ошибка создания файла!", MessageBoxButton.OK, MessageBoxImage.Error);
             UpdateFileTable();
         }
 
         private void FileTable_OnMouseDoubleClick_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
-                !(FileTable.SelectedItem is FileRecord file)) return;
+                !(FileTable.SelectedItem is ExplorerFile file)) return;
 
-            if (file.Attributes != (file.Attributes | (byte) MftHeader.Attribute.Directory)) return;
+            if (file.Attributes == (file.Attributes | (byte) MftHeader.Attribute.Directory))
+            {
 
-            ((Path) CurrentDirectory.DataContext).Add(file.FullName);
-            CurrentDirectory.Content = ((Path) CurrentDirectory.DataContext).CurrentPath;
-            UpdateFileTable();
+                ((Path) CurrentDirectory.DataContext).Add(file.FullName);
+                CurrentDirectory.Content = ((Path) CurrentDirectory.DataContext).CurrentPath;
+                UpdateFileTable();
+            }else Edit_Click(sender,e);
         }
 
         private void PreviousDirectory_Click(object sender, RoutedEventArgs e)
@@ -145,7 +153,7 @@ namespace MyOS
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
-                !(FileTable.SelectedItem is FileRecord file)) return;
+                !(FileTable.SelectedItem is ExplorerFile file)) return;
 
             SystemCalls.Copy((Path)CurrentDirectory.DataContext, file);
         }
@@ -154,13 +162,13 @@ namespace MyOS
         {
             SystemCalls.Paste((Path)CurrentDirectory.DataContext);
             UpdateFileTable();
-            FreeClusters.Content = SystemData.FreeClusters;
+            FreeClusters.Content = Bitmap.FreeClusters;
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
-                !(FileTable.SelectedItem is FileRecord file)) return;
+                !(FileTable.SelectedItem is ExplorerFile file)) return;
 
             int dotIndex = file.FullName.LastIndexOf('.');
             //проверка на длину имени и расширения
@@ -178,11 +186,11 @@ namespace MyOS
             }
 
             int directoryMftEntry = SystemCalls.FindDirectoryMftEntry((Path) CurrentDirectory.DataContext);
-            RootRecord record = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(fileName, extension, directoryMftEntry)); 
-            RootRecord bufferRecord = new RootRecord
+            DirectoryRecord record = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(fileName, extension, directoryMftEntry)); 
+            DirectoryRecord bufferRecord = new DirectoryRecord
             {
                 Attributes = file.Attributes,
-                CreationDate = file.CreadtionDate,
+                CreationDate = file.CreationDate,
                 Extension = extension,
                 FileName = fileName,
                 //Size = file.Size,
@@ -199,7 +207,7 @@ namespace MyOS
         private void Rename_Click(object sender, RoutedEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
-                !(FileTable.SelectedItem is FileRecord file)) return;
+                !(FileTable.SelectedItem is ExplorerFile file)) return;
 
             FileCreationWindow fileCreation =
                 new FileCreationWindow("Переименование файла") {FileName = {Text = file.FullName}};
@@ -234,8 +242,16 @@ namespace MyOS
             }
 
             int directoryMftEntry = SystemCalls.FindDirectoryMftEntry((Path)CurrentDirectory.DataContext);
-            RootRecord record = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(prevName, prevExtension, directoryMftEntry));
-            SystemCalls.Rename(record, name, extension, (Path)CurrentDirectory.DataContext);
+            DirectoryRecord newRecord = SystemCalls.GetFileInDirectory(directoryMftEntry,
+                SystemCalls.GetFilePosition(name, extension, directoryMftEntry));
+            if (newRecord != null)
+            {
+                MessageBox.Show(GetErrorMessage(newRecord.Attributes == (newRecord.Attributes | (byte)MftHeader.Attribute.Directory) ? -2 : -3, name, extension), "Ошибка создания файла!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            DirectoryRecord lastRecord = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(prevName, prevExtension, directoryMftEntry));
+            SystemCalls.Rename(lastRecord, name, extension, (Path)CurrentDirectory.DataContext);
 
             UpdateFileTable();
         }
@@ -243,7 +259,7 @@ namespace MyOS
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
-                !(FileTable.SelectedItem is FileRecord file)) return;
+                !(FileTable.SelectedItem is ExplorerFile file)) return;
 
             int dotIndex = file.FullName.LastIndexOf('.');
             string extension = dotIndex == -1 || file.Attributes ==
@@ -253,10 +269,10 @@ namespace MyOS
             string fileName =
                 file.FullName.Substring(0, extension.Length > 0 ? file.FullName.Length - extension.Length - 1 : file.FullName.Length);
             int directoryMftEntry = SystemCalls.FindDirectoryMftEntry((Path) CurrentDirectory.DataContext);
-            RootRecord record = new RootRecord()
+            DirectoryRecord record = new DirectoryRecord()
             {
                 Attributes = file.Attributes,
-                CreationDate = file.CreadtionDate,
+                CreationDate = file.CreationDate,
                 Extension = extension,
                 FileName = fileName,
                 //Size = file.Size,
@@ -264,7 +280,24 @@ namespace MyOS
             };
             SystemCalls.Delete((Path)CurrentDirectory.DataContext, record);
             UpdateFileTable();
-            FreeClusters.Content = SystemData.FreeClusters;
+            FreeClusters.Content = Bitmap.FreeClusters;
+        }
+
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            CurrentDirectory.DataContext = new Path();
+            CurrentDirectory.Content = ((Path)CurrentDirectory.DataContext).CurrentPath;
+            User.Text = Account.User.Name;
+            UpdateFileTable();
+            //ImageS.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/file1.png", UriKind.Absolute));
+            Time.Text = new MyDateTime(DateTime.Now).ToString();
+            var timer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = new TimeSpan(0, 1, 0),
+                IsEnabled = true
+            };
+            timer.Tick += (o, t) => { Time.Text = new MyDateTime(DateTime.Now).ToString(); };
+            timer.Start();
         }
     }
 }

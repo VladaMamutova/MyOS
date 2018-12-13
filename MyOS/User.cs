@@ -1,31 +1,44 @@
-﻿namespace MyOS
+﻿using System;
+using System.Text;
+
+namespace MyOS
 {
     /// <summary>
     /// Запись в списке пользователей, представляющая полную информацию об одном пользователе системы.
     /// </summary>
     public class User
     {
-        public const byte AdminUid = 0; // Идентификатор администратора.
-        public const int MaxUserCount = 256;
-        public const byte InfoSize = 193; // Размер заявки пользователя в списке пользователей.
+        public const byte AdministratorId = 0; // Идентификатор администратора.
+        public const byte AccountLength = 91; // Размер заявки пользователя в списке пользователей.
+        private const byte MaxUserId = Byte.MaxValue;
+        private static int _newId = 1;
 
-        public string Login { get; set; } // Логин.
         public string Name { get; set; } // Имя пользователя.
-        public byte Uid { get; set; } // Уникальный идентификатор.
-        public string Password { get; set; } // Пароль.
-        public string Salt { get; set; } // Уникальная соль для пароли.
-        public string HomeDirectory { get; set; } // Домашняя директория.
+        public byte Id { get; set; } // Уникальный идентификатор.
+        public byte[] PasswordHash { get; set; } // Пароль.
 
-        public User(string login, string name, byte uid, string password, string salt, string homeDirectory)
+        public User(string name, string password, bool isAdministrator = false)
         {
-            Login = login;
+            if (isAdministrator) Id = AdministratorId;
+            else
+            {
+                if (_newId > MaxUserId)
+                    throw new ArgumentException(
+                        "Превышено максимально допустимое количество пользоваетелей. Чтобы создать новую учётную запись, отформатируйте систему. Не забудьте сохранить на внешнем носителе всю информацию!");
+                Id = (byte) _newId;
+                _newId++;
+            }
+
             Name = name;
-            Uid = uid;
-            Password = HashEncryptor.EncodePassword(password, salt);
-            Salt = salt;
-            HomeDirectory = homeDirectory;
+            PasswordHash = password.ComputeHash();
         }
 
-        // Размер - 193 байта.
+        public User(byte[] userBytes)
+        {
+            if(userBytes.Length != AccountLength) return;
+            Name = Encoding.UTF8.GetString(userBytes.GetRange(0, 26)).Trim('\0');
+            Id = userBytes[26];
+            PasswordHash = userBytes.GetRange(27, 64);
+        }
     }
 }
