@@ -32,6 +32,7 @@ namespace MyOS
             }
             _isRegistrationWindow = !_isRegistrationWindow;
             UserName.Text = Password.Password = "";
+            
         }
         
         private void Register_Click(object sender, RoutedEventArgs e)
@@ -56,13 +57,11 @@ namespace MyOS
             }
             else
             {
-                if (Account.SignUp(UserName.Text, Password.Password))
+                if (Account.SignUp(UserName.Text, Password.Password, UserTypeRow.IsChecked != null && UserTypeRow.IsChecked.Value))
                 {
-                    UserName.Text = Password.Password = "";
-                    NeedNewAccountRow.Visibility = Visibility.Visible;
-                    SignIn.Content = "Войти";
+                    ChangeWindowState();
                 }
-                else MessageBox.Show("Пользователь c таким именем уже зарешистрирован в системе!",
+                else MessageBox.Show("Пользователь c таким именем уже зарегистрирован в системе!",
                     "Ошибка регистрации в систему", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

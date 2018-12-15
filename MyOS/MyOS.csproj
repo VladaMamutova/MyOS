@@ -63,6 +63,9 @@
     <Compile Include="Bitmap.cs" />
     <Compile Include="Buffer.cs" />
     <Compile Include="DataAttributes.cs" />
+    <Compile Include="Windows\ControlWindow.xaml.cs">
+      <DependentUpon>ControlWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\FileCreationWindow.xaml.cs">
       <DependentUpon>FileCreationWindow.xaml</DependentUpon>
     </Compile>
@@ -87,6 +90,10 @@
       <DependentUpon>TextEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="User.cs" />
+    <Page Include="Windows\ControlWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\FileCreationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

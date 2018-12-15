@@ -2,7 +2,7 @@
 
 namespace MyOS
 {
-    public struct Permission
+    public class Permission
     {
         [Flags]
         public enum Rights : byte
@@ -36,7 +36,7 @@ namespace MyOS
 
             ushort ushortPermissions = 0;
             // Поочередно записываем байты, содержащие права пользователей.
-            ushortPermissions = (ushort) (ushortPermissions | newPermissions[0]);
+            ushortPermissions = newPermissions[0];
             ushortPermissions = (ushort) (ushortPermissions << 8); // Сдвигаем влево на ещё один байт.
             ushortPermissions = (ushort) (ushortPermissions | newPermissions[1]);
 
@@ -57,18 +57,12 @@ namespace MyOS
 
         static Permission() // Для администратора и владельца файла по умолчанию определяются полные права.
         {
-            ushort ushortPermissions = 0;
-            // Записываем биты прав администратора.
-            ushortPermissions = (ushort)(ushortPermissions | (ushort)Rights.F);
-            // Сдвигаем влево на четыре бита для прав владельца.
-            ushortPermissions = (ushort)(ushortPermissions << 4);
-            // Записываем биты прав владельца файла.
-            ushortPermissions = (ushort)(ushortPermissions | (ushort)Rights.F);
-
-            ushortPermissions = (ushort)(ushortPermissions << 4);
-            // Записываем права для всех остальных пользователей.
-            //ushortPermissions = (ushort)(ushortPermissions | (ushort)Rights.);
-            Default._permissions = ushortPermissions;
+            byte[] permissionsBytes = new byte[2];
+            permissionsBytes[0] = (byte)Rights.F;
+            permissionsBytes[1] = (byte)Rights.F;
+            permissionsBytes[1] = (byte)(permissionsBytes[0] << 4);
+            
+            Default = new Permission(permissionsBytes);
         }
 
         public bool CheckRights(UserSign userSign, Rights right)
@@ -86,6 +80,19 @@ namespace MyOS
 
         public void SetPermission(UserSign userSign, Rights right, bool state)
         {
+            byte allUserRights = (byte)((_permissions >> (ushort)userSign) & 0b0000_1111);
+            if (state) allUserRights |= (byte)right;
+            else
+            {
+                switch (right)
+                {
+                    case Rights.F: allUserRights &= 0b0111; break;
+                    case Rights.M: allUserRights &= 0b0011; break;
+                    case Rights.R: allUserRights &= 0b0001; break;
+                    case Rights.W: allUserRights &= 0b0010; break;
+                }
+            }
+
             switch (userSign)
             {
                 case UserSign.Administrator: _permissions &= 0b1111_0000_1111_1111; break;
@@ -94,7 +101,7 @@ namespace MyOS
             }
 
             // Обновляем разрешения, добавляя к текущим новые права доступа.
-            if (state) _permissions |= (ushort)((ushort)right << (ushort)userSign);
+            _permissions |= (ushort)(allUserRights << (ushort)userSign);
         }
     }
 }

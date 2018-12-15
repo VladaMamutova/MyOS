@@ -20,11 +20,11 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
             <Button Content="Главная" Padding="5,0,5,0" Click="ShowMenu" Background="{x:Null}" BorderBrush="{x:Null}" />
-            <Button Content="Управление диском" Click="ShowMenu" Background="{x:Null}" BorderBrush="{x:Null}" />
+            <Button Content="Управление" Click="ShowControlWindow" Background="{x:Null}" BorderBrush="{x:Null}" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
                 <TextBlock x:Name="Time" HorizontalAlignment="Stretch" Width="Auto" Padding="0,1,10,0" TextAlignment="Right" Foreground="DarkSlateGray"/>
-                <TextBlock x:Name="User" Width="Auto" Padding="0,1,10,0" TextAlignment="Right" Foreground="#FF3E3B3B" />
+                <TextBlock x:Name="User" Width="Auto" Padding="0,1,10,0" TextAlignment="Right" Foreground="#FF3E3B3B" MouseLeftButtonDown="User_MouseLeftButtonDown" />
             </StackPanel>
         </Grid>
 

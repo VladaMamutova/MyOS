@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace MyOS
@@ -17,7 +18,7 @@ namespace MyOS
         public byte Id { get; set; } // Уникальный идентификатор.
         public byte[] PasswordHash { get; set; } // Пароль.
 
-        public User(string name, string password, bool isAdministrator = false)
+        public User(string name, string password, bool isAdministrator)
         {
             if (isAdministrator) Id = AdministratorId;
             else
@@ -39,6 +40,15 @@ namespace MyOS
             Name = Encoding.UTF8.GetString(userBytes.GetRange(0, 26)).Trim('\0');
             Id = userBytes[26];
             PasswordHash = userBytes.GetRange(27, 64);
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> userBytes = new List<byte>();
+            userBytes.AddRange(Name.GetFormatBytes(26));
+            userBytes.Add(Id);
+            userBytes.AddRange(PasswordHash);
+            return userBytes.ToArray();
         }
     }
 }

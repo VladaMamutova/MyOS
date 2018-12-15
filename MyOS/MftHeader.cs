@@ -87,13 +87,17 @@ namespace MyOS
                 return true;
             return false;
         }
+
         public string GetFullName()
         {
             return FileName + (Extension != "" ? "." + Extension : "");
         }
 
-        public bool IsDirectory() => Attributes == (Attributes | (byte) Attribute.Directory);
-        public bool IsHidden() => Attributes == (Attributes | (byte)Attribute.Hidden);
-        public bool IsReadOnly() => Attributes == (Attributes | (byte)Attribute.ReadOnly);
+        public void SetAttribute(Attribute attribute, bool state)
+        {
+            if (state) Attributes |= (byte)attribute;
+            else Attributes = (byte)(Attributes & (byte)~attribute);
+        }
+        public bool HasAttribute(Attribute attribute) => Attributes == (Attributes | (byte) attribute);
     }
 }

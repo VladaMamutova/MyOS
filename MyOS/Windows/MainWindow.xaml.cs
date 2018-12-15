@@ -31,12 +31,18 @@ namespace MyOS
             Menu.Visibility = Menu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
+        private void ShowControlWindow(object sender, RoutedEventArgs e)
+        {
+            ControlWindow controlWindow = new ControlWindow { Owner = this };
+            controlWindow.ShowDialog();
+        }
+
         private void ShowInfo_Click(object sender, RoutedEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is ExplorerFile file)) return;
             //Установка иконки
-            PropertiesWindow propertiesWindow = new PropertiesWindow(SystemCalls.GetMftHeader(file.MftEntry));
+            PropertiesWindow propertiesWindow = new PropertiesWindow(file.MftEntry);
             propertiesWindow.ShowDialog();
         }
 
@@ -58,15 +64,6 @@ namespace MyOS
         {
             LoginWindow loginWindow = new LoginWindow();
             loginWindow.ShowDialog();
-        }
-
-        private void Create_Click(object sender, RoutedEventArgs e)
-        {
-            SystemCalls.Formatting();
-            CurrentDirectory.DataContext = new Path();
-            CurrentDirectory.Content = ((Path)CurrentDirectory.DataContext).CurrentPath;
-            Bitmap.InitializeFreeClusters();
-            UpdateFileTable();
         }
 
         private string GetErrorMessage(int error, string name, string extension)
@@ -140,7 +137,8 @@ namespace MyOS
                 ((Path) CurrentDirectory.DataContext).Add(file.FullName);
                 CurrentDirectory.Content = ((Path) CurrentDirectory.DataContext).CurrentPath;
                 UpdateFileTable();
-            }else Edit_Click(sender,e);
+            }
+            else EditFile();
         }
 
         private void PreviousDirectory_Click(object sender, RoutedEventArgs e)
@@ -165,7 +163,7 @@ namespace MyOS
             FreeClusters.Content = Bitmap.FreeClusters;
         }
 
-        private void Edit_Click(object sender, RoutedEventArgs e)
+        private void EditFile()
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is ExplorerFile file)) return;
@@ -298,6 +296,11 @@ namespace MyOS
             };
             timer.Tick += (o, t) => { Time.Text = new MyDateTime(DateTime.Now).ToString(); };
             timer.Start();
+        }
+
+        private void User_MouseLeftButtonDown(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

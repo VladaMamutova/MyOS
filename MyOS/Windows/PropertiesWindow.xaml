@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Свойства" Height="337" Width="330" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen">
+        Title="Свойства" Height="337" Width="330" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen" Loaded="PropertiesWindow_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -38,8 +38,8 @@
                     <Separator Margin="0,10,0,10"></Separator>
                     <WrapPanel HorizontalAlignment="Center" Width="Auto">
                         <TextBlock TextWrapping="Wrap" Text="Атрибуты:" Padding="0,0,6,0" FontSize="14"/>
-                        <CheckBox x:Name ="ReadOnly" Content="Только чтение" Margin="0,3,0,0" FontSize="14"/>
-                        <CheckBox x:Name ="Hidden" Content="Скрытый" Margin="4,3,0,0" FontSize="14"/>
+                        <CheckBox x:Name ="ReadOnly" Content="Только чтение" Margin="0,3,0,0" FontSize="14" Checked="Readonly_CheckChanged" Unchecked="Readonly_CheckChanged"/>
+                        <CheckBox x:Name ="Hidden" Content="Скрытый" Margin="4,3,0,0" FontSize="14" Checked="Hidden_CheckChanged" Unchecked="Hidden_CheckChanged"/>
                     </WrapPanel>
                 </StackPanel>
             </TabItem>
@@ -52,7 +52,7 @@
                     <StackPanel Grid.Row="0" Margin="10,10,10,5">
                         <TextBlock HorizontalAlignment="Center" Margin="0,0,0,5" TextWrapping="Wrap" Text="Пользователи:" VerticalAlignment="Top" FontSize="14"/>
                         <ListBox HorizontalAlignment="Stretch" Focusable="False" VerticalAlignment="Top" FontSize="14">
-                            <ListBoxItem x:Name="Administrator" Content="Администратор" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Administrator"/>
+                            <ListBoxItem x:Name="Administrator" Content="Администраторы" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Administrator"/>
                             <ListBoxItem x:Name="OwnerName" Content="Владелец" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Owner"/>
                             <ListBoxItem Content="Все" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Other"/>
                     </ListBox>
@@ -60,18 +60,18 @@
                     <StackPanel Grid.Row="1" Margin="10,0">
                     <TextBlock HorizontalAlignment="Center" Margin="0,0,0,5" TextWrapping="Wrap" Text="Права:" FontSize="14"/>
                     <StackPanel x:Name="Permissions" Focusable="False" HorizontalAlignment="Center">
-                        <CheckBox x:Name ="FullControl" Content="Полный доступ" Padding="4,0,0,2"/>
-                        <CheckBox x:Name ="Modify" Content="Изменение" Padding="4,0,0,2"/>
-                        <CheckBox x:Name ="Write" Content="Запись" Padding="4,0,0,2"/>
-                        <CheckBox x:Name ="Read" Content="Чтение" Padding="4,0,0,2"/>
+                            <CheckBox x:Name ="FullControl" Content="Полный доступ" Padding="4,0,0,2" Checked="FullControl_Checked" Unchecked="FullControl_Checked"/>
+                            <CheckBox x:Name ="Modify" Content="Изменение" Padding="4,0,0,2" Checked="Modify_Checked" Unchecked="Modify_Checked"/>
+                            <CheckBox x:Name ="Write" Content="Запись" Padding="4,0,0,2" Checked="Write_Checked" Unchecked="Write_Checked"/>
+                            <CheckBox x:Name ="Read" Content="Чтение" Padding="4,0,0,2" Checked="Read_Checked" Unchecked="Read_Checked"/>
                     </StackPanel>
                     </StackPanel>
                 </Grid>
             </TabItem>
         </TabControl>
         <WrapPanel Grid.Row="1" HorizontalAlignment="Right" Height="Auto" Margin="0,0,7,0">
-            <Button Content="Ок" Margin="0,0,7,0" Width="97" FontSize="14" Height="30"/>
-            <Button Content="Отмена" Width="97" Height="30" FontSize="14"/>
+            <Button Content="Ок" Margin="0,0,7,0" Width="97" FontSize="14" Height="30" Click="Ok_Click"/>
+            <Button Content="Отмена" Width="97" Height="30" FontSize="14" Click="Cancel_Click"/>
         </WrapPanel>
     </Grid>
 </Window>

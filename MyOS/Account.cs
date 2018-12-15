@@ -75,10 +75,13 @@ namespace MyOS
             return User != null;
         }
 
-        public static bool SignUp(string name, string password)
+        public static bool SignUp(string name, string password, bool isAdministrator)
         {
             if(GetUser(name, password) != null) return false;
-            SystemCalls.RegisterUser(new User(name, password));
+            SystemCalls.RegisterUser(new User(name, password, isAdministrator));
+            MftHeader mftHeader = SystemCalls.GetMftHeader(SystemConstants.UserListRecNumber);
+            mftHeader.Size += User.AccountLength;
+            SystemCalls.UpdateMftEntry(mftHeader, SystemConstants.UserListRecNumber);
             return true;
         }
     }

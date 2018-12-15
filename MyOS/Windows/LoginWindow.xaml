@@ -36,11 +36,11 @@
                     <ControlTemplate TargetType="{x:Type ToggleButton}">
                         <StackPanel Orientation="Horizontal">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                            <Border x:Name="Administrator" Padding="6" Width="Auto" Height="30" Background="LightGray" CornerRadius="6,0,0,6" Margin="10,0,0,0">
-                                <TextBlock x:Name="AdministratorText" Text="Администратор" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border x:Name="Administrator" Padding="6" Width="Auto" Height="30" Background="#FFE2DCDC" CornerRadius="6,0,0,6" Margin="10,0,0,0">
+                                <TextBlock x:Name="AdministratorText" Text="Администратор" Foreground="#FF595959" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border x:Name="RegularUser" Padding="6" Width="Auto" Height="30" Background="LightGray" CornerRadius="0,6,6,0">
-                                <TextBlock x:Name="RegularUserText" Text="Обычный" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border x:Name="RegularUser" Padding="6" Width="Auto" Height="30" Background="#FFE2DCDC" CornerRadius="0,6,6,0">
+                                <TextBlock x:Name="RegularUserText" Text="Обычный" Foreground="#FF595959" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                         <ControlTemplate.Triggers>
@@ -48,11 +48,11 @@
                                 <Setter Property="Foreground" Value="#ADADAD"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="true">
-                                <Setter TargetName="Administrator" Property="Background" Value="LightBlue"/>
+                                <Setter TargetName="Administrator" Property="Background" Value="#FF245D70"/>
                                 <Setter TargetName="AdministratorText" Property="Foreground" Value="White"/>
                             </Trigger>
-                            <Trigger Property="IsChecked" Value="False">
-                                <Setter TargetName="RegularUser" Property="Background" Value="LightBlue"/>
+                            <Trigger Property="IsChecked" Value="false">
+                                <Setter TargetName="RegularUser" Property="Background" Value="#FF245D70"/>
                                 <Setter TargetName="RegularUserText" Property="Foreground" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -69,7 +69,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <ToggleButton Grid.Row="0" Margin="0,0,0,15" x:Name="UserTypeRow" Visibility="Collapsed" Content="Тип учётной записи:" 
-                      Style="{StaticResource ToggleButtonStyle1}"/>
+                      Style="{StaticResource ToggleButtonStyle1}" IsThreeState="False"/>
         <Grid Grid.Row="1" Margin="0,0,0,15">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>

@@ -94,7 +94,7 @@ namespace MyOS
             MessageBox.Show("Диск отформатирован!");
         }
 
-        static void UpdateMftEntry(MftHeader header, int entryNumber, bool mftMirrow = false)
+        public static void UpdateMftEntry(MftHeader header, int entryNumber, bool mftMirrow = false)
         {
             using (BinaryWriter bw = new BinaryWriter(File.Open(SystemConstants.SystemFile, FileMode.Open)))
             {
@@ -146,15 +146,13 @@ namespace MyOS
                                 using (BinaryWriter bw = new BinaryWriter(br.BaseStream))
                                 {
                                     bw.BaseStream.Position -= User.AccountLength;
-                                    bw.Write(user.Name.GetFormatBytes(26));
-                                    bw.Write(user.Id);
-                                    bw.Write(user.PasswordHash);
+                                    bw.Write(user.GetBytes());
                                 }
 
                                 return;
                             }
 
-                            offset += DirectoryRecord.Length;
+                            offset += User.AccountLength;
 
                         }
                     }
@@ -183,7 +181,7 @@ namespace MyOS
                         }
 
                         if (userBytes.SequenceEqual(new byte[User.AccountLength]))
-                        {
+                        {// !!!!!!!!!!!!!!!
                             using (BinaryWriter bw = new BinaryWriter(br.BaseStream))
                             {
                                 bw.BaseStream.Position -= User.AccountLength;
@@ -194,7 +192,7 @@ namespace MyOS
                             return;
                         }
 
-                        offset += DirectoryRecord.Length;
+                        offset += User.AccountLength;
                     }
                 }
             }
@@ -700,10 +698,10 @@ namespace MyOS
                 fileCopy.Size = 0;
 
                 int mftEntry = CreateFile(fileCopy, destinationPath);
-                //if(-1)
+                if (mftEntry == -1) return copyList; // Не хватает памяти для копирования.
+
                 if (sourceFile.Attributes == (sourceFile.Attributes | (byte)MftHeader.Attribute.Directory))
                 {
-                    
                     Path from = new Path(sourcePath);
                     from.Add(sourceFile.FileName);
                     Path to = new Path(destinationPath);
@@ -749,12 +747,17 @@ namespace MyOS
                 copy.CreationDate = copy.ModificationDate = new MyDateTime(DateTime.Now);
                 copy.Size = 0;
 
-                int mftEntry, attempt = 1;
                 string name = copy.FileName;
-                while ((mftEntry = CreateFile(copy, path)) < -1)
-                    copy.FileName = name + " (" + attempt++ + ")";
+                var mftEntry = CreateFile(copy, path);
+                if (mftEntry == -1) return; // Не хватает памяти для копирования файла.
+                // проверка на длину имени.
 
-                if (copy.Attributes == (copy.Attributes | (byte) MftHeader.Attribute.Directory))
+                int attempt = 1;
+                if (mftEntry < -1) // Файл с указанным именем уже существует в системе.
+                    while ((mftEntry = CreateFile(copy, path)) < -1)
+                        copy.FileName = name + " (" + attempt++ + ")";
+
+                if (copy.HasAttribute(MftHeader.Attribute.Directory))
                 {
                     Path from = new Path(SystemData.Buffer.Path);
                     from.Add(SystemData.Buffer.Record.FileName);
@@ -763,7 +766,11 @@ namespace MyOS
                     List<DirectoryRecord> childCopyFileList =
                         CopyRecursively(new DirectoryRecord(GetMftHeader(SystemData.Buffer.Record.Number), SystemData.Buffer.Record.Number), from, new DirectoryRecord(copy, mftEntry), to);
                     // Если не хватало памяти, то не все записи были скопированы и размер директории будет меньше.
-                    copy.Size = childCopyFileList.Count * DirectoryRecord.Length;
+                    if (childCopyFileList.Count * DirectoryRecord.Length != copy.Size)
+                    {
+                        copy.Size = childCopyFileList.Count * DirectoryRecord.Length;
+                        UpdateMftEntry(copy, mftEntry);
+                    }
                 }
                 else
                 {

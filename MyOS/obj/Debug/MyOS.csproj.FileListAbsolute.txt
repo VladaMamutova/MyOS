@@ -20,3 +20,5 @@ F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\M
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\MainWindow.baml
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\PropertiesWindow.baml
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\PropertiesWindow.g.cs
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\ControlWindow.g.cs
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\ControlWindow.baml
