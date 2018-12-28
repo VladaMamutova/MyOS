@@ -8,9 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/file.png")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/file1.png")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/folder.png")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/folder1.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/power_off_hover.png")]
 
 

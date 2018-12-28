@@ -3,103 +3,228 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MyOS.ViewModels"
         mc:Ignorable="d"
-        Title="MyOS" Height="400" Width="600" MinHeight="400" MinWidth="600" Loaded="MainWindow_OnLoaded" WindowStartupLocation="CenterScreen">
-    <Grid Margin="0,0,0,0">
+        Title="MyOS" Height="450" Width="700" MinHeight="450" MinWidth="600" Loaded="MainWindow_OnLoaded" WindowStartupLocation="CenterScreen" Activated="MainWindow_Activated" Background="#FF153742">
+    <Window.Resources>
+        <Style x:Key="MenuItem">
+            <Setter Property="Control.Foreground" Value="White"></Setter>
+            <Setter Property="Control.HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="Control.VerticalAlignment" Value="Center"></Setter>
+        </Style>
+        <Thickness x:Key="ButtonAboveMargin" Bottom="3" Left="15" Top="8" Right="15" />
+        <Thickness x:Key="ButtonUnderMargin" Bottom="8" Left="15" Top="3" Right="15" />
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="local:Commands.Copy"
+                        Executed="Copy_Click"></CommandBinding>
+        <CommandBinding Command="local:Commands.Paste"
+                        Executed="Paste_Click"></CommandBinding>
+        <CommandBinding Command="local:Commands.Rename"
+                        Executed="Rename_Click"></CommandBinding>
+        <CommandBinding Command="local:Commands.Delete"
+                        Executed="Delete_Click"></CommandBinding>
+        <CommandBinding Command="local:Commands.ShowProperties"
+                        Executed="ShowInfo_Click"></CommandBinding>
+        <CommandBinding Command="local:Commands.CreateFile"
+                        Executed="CreateFile_Click"></CommandBinding>
+        <CommandBinding Command="local:Commands.CreateFolder"
+                        Executed="CreateFolder_Click"></CommandBinding>
+        <CommandBinding Command = "local:Commands.Create100Files"
+                        Executed="Create100Files"></CommandBinding>
+        <CommandBinding Command = "local:Commands.Create100Folders"
+                        Executed="Create100Folders"></CommandBinding>
+    </Window.CommandBindings>
+    <Grid Margin="0,0,0,0" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal">
-            <Button Content="Главная" Padding="5,0,5,0" Click="ShowMenu" Background="{x:Null}" BorderBrush="{x:Null}" />
-            <Button Content="Управление" Click="ShowControlWindow" Background="{x:Null}" BorderBrush="{x:Null}" />
-            </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
-                <TextBlock x:Name="Time" HorizontalAlignment="Stretch" Width="Auto" Padding="0,1,10,0" TextAlignment="Right" Foreground="DarkSlateGray"/>
-                <TextBlock x:Name="User" Width="Auto" Padding="0,1,10,0" TextAlignment="Right" Foreground="#FF3E3B3B" MouseLeftButtonDown="User_MouseLeftButtonDown" />
+                <TextBlock x:Name="Time" HorizontalAlignment="Stretch" Width="Auto" Padding="0,3,10,0" TextAlignment="Right" Foreground="LightGray"/>
+                <TextBlock x:Name="User" Width="Auto" Cursor="Hand" Padding="0,3,10,0" TextAlignment="Right" Foreground="LightGray" MouseLeftButtonDown="User_MouseLeftButtonDown" MouseEnter="User_MouseEnter" MouseLeave="User_MouseLeave"/>
+                <Button Width="Auto" Click="ShowControlWindow" Margin="0,5,5,2" Background="{x:Null}" BorderBrush="{x:Null}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Image Name="image"
+                                   Source="pack://application:,,,/Resources/tools.png"/>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="true">
+                                    <Setter TargetName="image"
+                                            Property="Source"
+                                            Value="pack://application:,,,/Resources/tools_hover.png" />
+                                    <Setter TargetName="image"
+                                            Property="Cursor"
+                                            Value="Hand" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button Width="Auto" Click="PowerOff_Click" Margin="0,3,5,0" Background="{x:Null}" BorderBrush="{x:Null}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Image Name="image1"
+                                   Source="pack://application:,,,/Resources/power_off.png"/>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="true">
+                                    <Setter TargetName="image1"
+                                            Property="Source"
+                                            Value="pack://application:,,,/Resources/power_off_hover.png" />
+                                    <Setter TargetName="image1"
+                                            Property="Cursor"
+                                            Value="Hand" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    </Button>
             </StackPanel>
         </Grid>
-
-        <WrapPanel Grid.Column="0" Grid.Row="2">
-            <Button x:Name="PreviousDirectory" Content="&#60;" VerticalAlignment="Stretch" Width="39"  Click="PreviousDirectory_Click" Background="#FFBCBCCC" BorderBrush="#FFBCBCCC"/>
-            <Label x:Name="CurrentDirectory" HorizontalContentAlignment="Stretch" Content="{Binding Path}" HorizontalAlignment="Left" FontSize="16"/>
+        <TextBlock Grid.Row="1" Height="1" Background="#FF193F4B"/>
+        <WrapPanel Grid.Column="0" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Button x:Name="PreviousDirectory" Content="&#60;" Margin="0,0,10,0" Height="28" Width="40" Click="PreviousDirectory_Click" Background="#FF79B2B2" BorderBrush="#FF153742"/>
+            <TextBlock x:Name="CurrentDirectory" TextWrapping="NoWrap" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" Foreground="White"/>
         </WrapPanel>
 
         <Grid Row="3">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="130"></ColumnDefinition>
-                <ColumnDefinition Width="2"></ColumnDefinition>
+                <ColumnDefinition Width="*" MaxWidth="400" MinWidth="150"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*" MinWidth="450"></ColumnDefinition>
-                <ColumnDefinition Width="1"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TreeView Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-               
-            </TreeView>
-            <GridSplitter Grid.Column="1" ShowsPreview="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></GridSplitter>
-            <DataGrid x:Name="FileTable" Grid.Column="2" MinWidth="150" HorizontalAlignment="Stretch" HorizontalGridLinesBrush="LightGray" GridLinesVisibility="Horizontal" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="FileTable_OnMouseDoubleClick_MouseDoubleClick" FontSize="14">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Image Width="Auto" Height="Auto" Source="{Binding Path =ImageSource}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Имя" Binding="{Binding Path=FullName}" />
-                    <DataGridTextColumn Header="Дата создания" Binding="{Binding Path=CreationDate}" />
-                    <DataGridTextColumn Header="Дата изменения" Binding="{Binding Path=ModificationDate}" />
-                    <DataGridTextColumn Header="Размер" Binding="{Binding Path=Size}" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid>
+                <UniformGrid Columns="2" Margin="2,0">
+                    <FrameworkElement x:Name="C1"/>
+                </UniformGrid>
+                <TabControl Grid.Column="0" Margin="0" Background="#FF245D70">
+                    <TabItem Header="Действия" FontSize="14" Width="{Binding ElementName=C1, Path=ActualWidth}" Background="#FF245D70" BorderBrush="#FF153742">
+                        <Grid Name="Menu" Visibility="Visible">
+                            <Grid Background="#FF94CDCD" VerticalAlignment="Stretch">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" MaxHeight="110"/>
+                                    <RowDefinition Height="*" MaxHeight="110"/>
+                                    <RowDefinition Height="*" MaxHeight="110"/>
+                                    <RowDefinition Height="0.7*" MaxHeight="80"/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="2*"></RowDefinition>
+                                        <RowDefinition Height="3*"></RowDefinition>
+                                        <RowDefinition Height="3*"></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Button Grid.Row="1" Margin="{StaticResource ButtonAboveMargin}" Content="Создать файл" Click="CreateFile_Click" Background="#FF94CDCD" BorderBrush="#FF69A2A2"/>
+                                    <Button Grid.Row="2" Margin="{StaticResource ButtonUnderMargin}" Content="Создать папку" Click="CreateFolder_Click" Background="#FF94CDCD" BorderBrush="#FF69A2A2" />
+                                    <Grid Grid.Row="0" Background="#FF245D70">
+                                        <TextBlock Style="{StaticResource MenuItem}" Text="Создание" FontSize="14"></TextBlock>
+                                    </Grid>
+                                </Grid>
+                                <Grid Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="2*"></RowDefinition>
+                                        <RowDefinition Height="3*"></RowDefinition>
+                                        <RowDefinition Height="3*"></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Button Grid.Row="1" Margin="{StaticResource ButtonAboveMargin}" Click="Copy_Click" Content="Копировать" Background="#FF94CDCD" BorderBrush="#FF69A2A2"/>
+                                    <Button Grid.Row="2" Content="Вставить" Margin="{StaticResource ButtonUnderMargin}" Click="Paste_Click" Background="#FF94CDCD" BorderBrush="#FF69A2A2"/>
+                                    <Grid Grid.Row="0" Background="#FF245D70">
+                                        <TextBlock Text="Буфер обмена" FontSize="14" Style="{StaticResource MenuItem}"></TextBlock>
+                                    </Grid>
+                                </Grid>
+                                <Grid Grid.Row="2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="2*"></RowDefinition>
+                                        <RowDefinition Height="3*"></RowDefinition>
+                                        <RowDefinition Height="3*"></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Button Grid.Row="1" Content="Переименовать" Margin="{StaticResource ButtonAboveMargin}" Click="Rename_Click" Background="#FF94CDCD" BorderBrush="#FF69A2A2"/>
+                                    <Button Grid.Row="2" Content="Удалить" Margin="{StaticResource ButtonUnderMargin}" Click="Delete_Click" Background="#FF94CDCD" BorderBrush="#FF69A2A2"/>
+                                    <Grid Grid.Row="0" Background="#FF245D70">
+                                        <TextBlock Text="Изменение" FontSize="14" Style="{StaticResource MenuItem}"></TextBlock>
+                                    </Grid>
+                                </Grid>
+                                <Grid Grid.Row="3">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="2*"></RowDefinition>
+                                        <RowDefinition Height="3*"></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Button Grid.Row="1" Content="Свойства" Margin="15,7" Click="ShowInfo_Click" Background="#FF94CDCD" BorderBrush="#FF69A2A2"/>
+                                    <Grid Grid.Row="0" Background="#FF245D70">
+                                        <TextBlock Text="Просмотр" FontSize="14" Style="{StaticResource MenuItem}"></TextBlock>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="Вид" FontSize="14" Width="{Binding ElementName=C1, Path=ActualWidth}" Background="#FF245D70" BorderBrush="#FF153742" >
+                        <Grid Background="#FF94CDCD">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition Height="40"></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="Auto" Margin="15">
+                                <CheckBox Content="Имя" Margin="0,0,0,6" FontSize="14" IsChecked="True" IsEnabled="False"/>
+                                <CheckBox x:Name ="CreationDateColumn" Content="Дата создания" Margin="0,0,0,6" FontSize="14" Checked="CreationDateColumn_CheckChanged" Unchecked="CreationDateColumn_CheckChanged"/>
+                                <CheckBox x:Name ="ModificationDateColumn" Content="Дата изменения" Margin="0,0,0,6" FontSize="14" Checked="ModificationDateColumn_CheckChanged" Unchecked="ModificationDateColumn_CheckChanged"/>
+                                <CheckBox x:Name ="SizeColumn" Content="Размер" FontSize="14" Checked="SizeColumn_CheckChanged" Unchecked="SizeColumn_CheckChanged"/>
+                            </StackPanel>
+                            <Grid Grid.Row="0" Background="#FF245D70">
+                                <TextBlock Style="{StaticResource MenuItem}" TextWrapping="Wrap" Text="Выбор столбцов в таблице:" TextAlignment="Center" FontSize="14"></TextBlock>
+                            </Grid>
+                            <Grid Grid.Row="2" Background="#FF245D70">
+                                <TextBlock Style="{StaticResource MenuItem}" TextWrapping="Wrap" Text="Параметры отображения файлов:" TextAlignment="Center" FontSize="14"></TextBlock>
+                            </Grid>
+                            <CheckBox x:Name="ShowHidden" Grid.Row="3" Height="Auto" FontSize="14" HorizontalAlignment="Center" Margin="15" Checked="ShowHidden_Checked" Unchecked="ShowHidden_Unchecked">
+                                <TextBlock Text="Показать скрытые файлы" TextWrapping="Wrap"></TextBlock>
+                            </CheckBox>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+            <GridSplitter Grid.Column="1" Width="2" ShowsPreview="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></GridSplitter>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition Height="20"></RowDefinition>
+                </Grid.RowDefinitions>
+                <DataGrid x:Name="FileTable" Grid.Row="0" FontSize="14" HeadersVisibility="Column"  CanUserResizeRows="False" HorizontalGridLinesBrush="LightGray" GridLinesVisibility="Horizontal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" MouseDoubleClick="FileTable_OnMouseDoubleClick">
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="" CanUserResize="False" MinWidth="40" MaxWidth="40">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Width="50" Height="40" Source="{Binding Path =ImageSource}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn >
+                        <DataGridTextColumn IsReadOnly ="True" Header="Имя" SortDirection="Ascending" Binding="{Binding Path=FullName}" />
+                        <DataGridTextColumn IsReadOnly ="True" Header="Дата создания" Binding="{Binding Path=CreationDate}" />
+                        <DataGridTextColumn IsReadOnly ="True" Header="Дата изменения" Binding="{Binding Path=ModificationDate}" />
+                        <DataGridTextColumn IsReadOnly ="True" Header="Размер" Binding="{Binding Path=Size}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                    <TextBlock Margin="10,0,7,0" Text="Элементов:" Foreground="LightGray" VerticalAlignment="Center" ></TextBlock>
+                    <TextBlock x:Name="FileCount" Foreground="LightGray" VerticalAlignment="Center" ></TextBlock>
+                </StackPanel>
+            </Grid>
         </Grid>
-
-        <Label x:Name ="FreeClusters" Content="Label" HorizontalAlignment="Left" Margin="240,294,0,0" VerticalAlignment="Top"/>
-
-        <Grid Name="Menu" Grid.Column="0" Grid.Row="1" Visibility="Collapsed" Height="80" Background="#FF99B9E8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="20"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="1"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="1"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="1"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button Grid.Row="0" Grid.Column="0" Content="Создать файл" HorizontalAlignment="Stretch" 
-                    Margin="5,5,5,5" Click="CreateFile_Click" Background="LightSteelBlue" BorderBrush="DarkCyan"/>
-            <Button Grid.Row="1" Grid.Column="0" Content="Создать папку" HorizontalAlignment="Stretch" 
-                    Margin="5,5,5,5" Click="CreateFolder_Click" Background="LightSteelBlue" BorderBrush="#FF8090A8"/>
-            <TextBlock Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Margin="0,3,0,3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="DarkCyan"></TextBlock>
-            <TextBlock Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="Создать"></TextBlock>
-            <Button Grid.Row="0" Grid.Column="2" Content="Копировать" HorizontalAlignment="Stretch" 
-                    Margin="5,5,5,5" Click="Copy_Click" Background="LightSteelBlue" BorderBrush="#FF8090A8"/>
-            <Button Grid.Row="1" Grid.Column="2" Content="Вставить" HorizontalAlignment="Stretch" 
-                    Margin="5,5,5,5" Click="Paste_Click" Background="LightSteelBlue" BorderBrush="#FF8090A8"/>
-            <TextBlock Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="Буфер обмена"></TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="3" Grid.RowSpan="3" Margin="0,3,0,3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="DarkCyan"></TextBlock>
-            <Button Grid.Row="0" Grid.Column="4" Content="Удалить" HorizontalAlignment="Stretch" 
-                    Margin="5,5,5,5" Click="Delete_Click" Background="LightSteelBlue" BorderBrush="#FF8090A8"/>
-            <Button Grid.Row="1" Grid.Column="4" Content="Переименовать" HorizontalAlignment="Stretch" 
-                    Margin="5,5,5,5" Click="Rename_Click" Background="LightSteelBlue" BorderBrush="#FF8090A8"/>
-            <TextBlock Grid.Row="2" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="Изменить"></TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" Margin="0,3,0,3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF2735D1"></TextBlock>
-            <Button Grid.Row="0" Grid.Column="6" Grid.RowSpan="2" Content="Свойства" HorizontalAlignment="Stretch" 
-                    Margin="5,5,5,5" Click="ShowInfo_Click" Background="LightSteelBlue" BorderBrush="#FF8090A8"/>
-            <TextBlock Grid.Row="2" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="Открыть"></TextBlock>
-        </Grid>
-
     </Grid>
 </Window>
+

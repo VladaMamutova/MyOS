@@ -3,16 +3,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:MyOS.ViewModels"
         mc:Ignorable="d"
-        Title="" Height="300" Width="500">
+        Title="" MinHeight="200" MinWidth="300" Width="500" Height="300" WindowStartupLocation="CenterScreen">
+    <Window.CommandBindings>
+        <CommandBinding Command="viewModels:Commands.Save"
+                        Executed="Save_Click"></CommandBinding>
+    </Window.CommandBindings>
     <Grid>
-        <TextBox x:Name="FileContent" HorizontalAlignment="Left" Height="249" Margin="0,20,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="492"/>
-        <Menu HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="492">
-            <MenuItem Header="File">
-                <MenuItem Header="Save" Click="Save_Click" ></MenuItem>
-                <Separator />
-                <MenuItem Header="Exit" ></MenuItem>
-            </MenuItem>
-        </Menu>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" x:Name="FileContent" Padding="10" HorizontalAlignment="Stretch" AcceptsReturn="True" TextWrapping="Wrap" TextChanged="FileContent_OnTextChanged" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" VerticalAlignment="Stretch" FontSize="14"/>
+        <WrapPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,10,0,10">
+            <Button x:Name="Save" IsEnabled="False" Content="Сохранить" MinHeight="30" Padding="30,0,30,0" MaxHeight="50" FontSize="14" Click="Save_Click"></Button>
+            <TextBlock Width="10"></TextBlock>
+            <Button Content="Закрыть" MinHeight="30" Padding="30,0,30,0" MaxHeight="50" FontSize="14" Click="Cancel_Click"></Button>
+        </WrapPanel>
     </Grid>
 </Window>

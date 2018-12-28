@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MyOS.FileSystem.SystemCalls">
+    <Position X="0.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>QAAFjIDKAAJACQEAABIACCAAAgHsgEIIAAgFAACigIA=</HashCode>
+      <FileName>FileSystem\SystemCalls.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MyOS.FileSystem.FileSystem">
+    <Position X="3" Y="0.5" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Struct Name="MyOS.FileSystem.FileSystem.Constants">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\FileSystem.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIIAAACCAAAgAACSAAAAABAAQARiABAAAQAA=</HashCode>
+      <FileName>FileSystem\FileSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MyOS.FileSystem.SpecialDataTypes.SystemBuffer">
+    <Position X="12.5" Y="6.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\Buffer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MyOS.FileSystem.SpecialDataTypes.DirectoryRecord">
+    <Position X="10.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAQAAAAEABAkhAIAAABQAAAAAQAIAAAAAABAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\DirectoryRecord.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MyOS.FileSystem.SpecialDataTypes.Extensions">
+    <Position X="9" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAQAAAAAAAAAAAAAgACAAAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\Extensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MyOS.FileSystem.SpecialDataTypes.FsException">
+    <Position X="14.5" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.FsException.Command">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\FsException.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.FsException.Code" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\FsException.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.FsException.Element">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\FsException.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAAAAAAQAAAAAAAgAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\FsException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MyOS.FileSystem.SpecialDataTypes.Permission">
+    <Position X="7.25" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.Permission.Rights">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\Permission.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.Permission.UserSign">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\Permission.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AACCAAAABAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\Permission.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MyOS.FileSystem.SpecialDataTypes.UserRecord" BaseTypeListCollapsed="true">
+    <Position X="10.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACCCAAQAAAAEAAAAhAIAAARAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\UserRecord.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MyOS.FileSystem.SpecialDataTypes.MftHeader">
+    <Position X="5.5" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.MftHeader.Signature">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\MftHeader.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.MftHeader.Attribute">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\MftHeader.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>QACAAAAAECIAgBAEgAAAAAhQAAAAAQAIEAAQAABAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\MftHeader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="MyOS.FileSystem.SpecialDataTypes.Data">
+    <Position X="7.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\Data.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MyOS.FileSystem.SpecialDataTypes.FormattingOptions">
+    <Position X="12.5" Y="4.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAQiAAAAAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\FormattingOptions.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MyOS.FileSystem.SpecialDataTypes.MyDateTime">
+    <Position X="9" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAgAAAAIAEAEAhEAAAgAACAAAAAAAAABAAAAAhBIAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\MyDateTime.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MyOS.FileSystem.SpecialDataTypes.MemoryAllocation">
+    <Position X="12.5" Y="0.5" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="MyOS.FileSystem.SpecialDataTypes.MemoryAllocation.Attribute">
+        <TypeIdentifier>
+          <NewMemberFileName>FileSystem\SpecialDataTypes\MemoryAllocation.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\MemoryAllocation.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Interface Name="MyOS.FileSystem.SpecialDataTypes.IRecord">
+    <Position X="9" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAQAAAAEAAAAhAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\IRecord.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="MyOS.FileSystem.SpecialDataTypes.ClusterState">
+    <Position X="14.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAQAAAAAAIAAAAAAI=</HashCode>
+      <FileName>FileSystem\SpecialDataTypes\ClusterState.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

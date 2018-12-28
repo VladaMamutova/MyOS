@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using MessageBox = System.Windows.MessageBox;
+using MyOS.FileSystem;
+using MyOS.FileSystem.SpecialDataTypes;
 
 namespace MyOS
 {
@@ -17,7 +18,7 @@ namespace MyOS
 
             _mftHeader = SystemCalls.GetMftHeader(mftEntry);
             _mftFileEntry = mftEntry;
-            _previousPermissions = new Permission(_mftHeader.Permission.GetBytes());
+            _previousPermissions = new Permission(_mftHeader.Permissions.GetBytes());
             _previousAttributes = _mftHeader.Attributes;
         }
 
@@ -25,86 +26,101 @@ namespace MyOS
         private readonly int _mftFileEntry;
         private readonly Permission _previousPermissions;
         private readonly byte _previousAttributes;
+        private Permission.UserSign _currentUserSign;
 
         private void PropertiesWindow_Loaded(object sender, RoutedEventArgs e)
         {
             FileName.Text = _mftHeader.GetFullName();
-            Type.Text = _mftHeader.HasAttribute(MftHeader.Attribute.Directory) ? "Папка с файлами" : _mftHeader.Extension == "" ? "Файл" : _mftHeader.Extension;
+            bool isDirectory = _mftHeader.HasAttribute(MftHeader.Attribute.Directory);
+            Type.Text = isDirectory ? "Папка с файлами" :
+                _mftHeader.Extension == "" ? "Файл" : _mftHeader.Extension;
             CreationDateTime.Text = _mftHeader.CreationDate.ToString();
             ModificationDateTime.Text = _mftHeader.CreationDate.ToString();
-            Size.Text = _mftHeader.Size + " Б";
+            Size.Text = (isDirectory ? SystemCalls.GetDirectorySize(_mftFileEntry) : _mftHeader.Size).ToString("N0") + " Б";
             Hidden.IsChecked = _mftHeader.HasAttribute(MftHeader.Attribute.Hidden);
             ReadOnly.IsChecked = _mftHeader.HasAttribute(MftHeader.Attribute.ReadOnly);
-            if (_mftHeader.UserId == User.AdministratorId) OwnerName.Visibility = Visibility.Collapsed;
-            else OwnerName.Content = SystemCalls.GetUserById(_mftHeader.UserId).Name;
+            OwnerName.Content = SystemCalls.GetUserById(_mftHeader.UserId).Name;
 
-            Administrator.IsSelected = true;
-            UpdatePermissions();
+            _currentUserSign = _mftHeader.UserId == FileSystem.FileSystem.CurrentUser.Id ? Permission.UserSign.Owner :
+                FileSystem.FileSystem.CurrentUser.IsAdministrator ? Permission.UserSign.Administrator : Permission.UserSign.Other;
+            
+            switch (_currentUserSign)
+            {
+                case Permission.UserSign.Administrator: UserList.SelectedItem = Administrator;
+                    break;
+                case Permission.UserSign.Owner:
+                    UserList.SelectedItem = OwnerName;
+                    break;
+                case Permission.UserSign.Other:
+                    UserList.SelectedItem = AllUsers;
+                    break;
+            }
+            
 
-            Permissions.IsEnabled = _mftHeader.HasPermissions(Account.User.Id, Permission.Rights.F) || Account.User.Id == User.AdministratorId;
-            ReadOnly.IsEnabled = Hidden.IsEnabled = _mftHeader.HasPermissions(Account.User.Id, Permission.Rights.W);
+            Permissions.IsEnabled = _mftHeader.HasPermissions(FileSystem.FileSystem.CurrentUser, Permission.Rights.FullControl) ||
+                                    FileSystem.FileSystem.CurrentUser.IsAdministrator;
+            ReadOnly.IsEnabled = Hidden.IsEnabled =
+                _mftHeader.HasPermissions(FileSystem.FileSystem.CurrentUser, Permission.Rights.Write);
         }
-
-        private Permission.UserSign GetCurrentUserSign()
-        {
-            return Administrator.IsSelected ? Permission.UserSign.Administrator :
-                OwnerName.IsSelected ? Permission.UserSign.Owner : Permission.UserSign.Other;
-        }
-
+        
         private void UpdatePermissions()
         {
-            Permission.UserSign userSign = GetCurrentUserSign();
-            
-            FullControl.IsChecked = _mftHeader.Permission.CheckRights(userSign, Permission.Rights.F);
-            Modify.IsChecked = _mftHeader.Permission.CheckRights(userSign, Permission.Rights.M);
-            Write.IsChecked = _mftHeader.Permission.CheckRights(userSign, Permission.Rights.W);
-            Read.IsChecked = _mftHeader.Permission.CheckRights(userSign, Permission.Rights.R);
+            FullControl.IsChecked = _mftHeader.Permissions.CheckRights(_currentUserSign, Permission.Rights.FullControl);
+            Modify.IsChecked = _mftHeader.Permissions.CheckRights(_currentUserSign, Permission.Rights.Modify);
+            Write.IsChecked = _mftHeader.Permissions.CheckRights(_currentUserSign, Permission.Rights.Write);
+            Read.IsChecked = _mftHeader.Permissions.CheckRights(_currentUserSign, Permission.Rights.Read);
         }
 
         private void Selected_Administrator(object sender, RoutedEventArgs e)
         {
+            _currentUserSign = Permission.UserSign.Administrator;
             UpdatePermissions();
         }
 
         private void Selected_Owner(object sender, RoutedEventArgs e)
         {
-            Administrator.IsSelected = false;
+            _currentUserSign = Permission.UserSign.Owner;
             UpdatePermissions();
         }
 
         private void Selected_Other(object sender, RoutedEventArgs e)
         {
-            Administrator.IsSelected = false;
+            _currentUserSign = Permission.UserSign.Other;
+            UpdatePermissions();
+        }
+
+        private void ChangePermission(Permission.Rights right, bool state)
+        {
+            _mftHeader.Permissions.SetPermission(_currentUserSign, right, state);
             UpdatePermissions();
         }
 
         private void FullControl_Checked(object sender, RoutedEventArgs e)
         {
-            _mftHeader.Permission.SetPermission(GetCurrentUserSign(), Permission.Rights.F, FullControl.IsChecked != null && FullControl.IsChecked.Value);
-            UpdatePermissions();
+            ChangePermission(Permission.Rights.FullControl, FullControl.IsChecked != null && FullControl.IsChecked.Value);
         }
 
         private void Modify_Checked(object sender, RoutedEventArgs e)
         {
-            _mftHeader.Permission.SetPermission(GetCurrentUserSign(), Permission.Rights.M, Modify.IsChecked != null && Modify.IsChecked.Value);
-            UpdatePermissions();
+            ChangePermission(Permission.Rights.Modify,
+                Modify.IsChecked != null && Modify.IsChecked.Value);
         }
 
         private void Write_Checked(object sender, RoutedEventArgs e)
         {
-            _mftHeader.Permission.SetPermission(GetCurrentUserSign(), Permission.Rights.W, Write.IsChecked != null && Write.IsChecked.Value);
-            UpdatePermissions();
+            ChangePermission(Permission.Rights.Write,
+                Write.IsChecked != null && Write.IsChecked.Value);
         }
 
         private void Read_Checked(object sender, RoutedEventArgs e)
         {
-            _mftHeader.Permission.SetPermission(GetCurrentUserSign(), Permission.Rights.R, Read.IsChecked != null && Read.IsChecked.Value);
-            UpdatePermissions();
+            ChangePermission(Permission.Rights.Read, Read.IsChecked != null && Read.IsChecked.Value);
         }
 
         private void Readonly_CheckChanged(object sender, RoutedEventArgs e)
         {
-            _mftHeader.SetAttribute(MftHeader.Attribute.ReadOnly, ReadOnly.IsChecked != null && ReadOnly.IsChecked.Value);
+            _mftHeader.SetAttribute(MftHeader.Attribute.ReadOnly,
+                ReadOnly.IsChecked != null && ReadOnly.IsChecked.Value);
         }
 
         private void Hidden_CheckChanged(object sender, RoutedEventArgs e)
@@ -114,19 +130,23 @@ namespace MyOS
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            if (!_mftHeader.Permission.GetBytes().SequenceEqual(_previousPermissions.GetBytes()) ||
+            if (!_mftHeader.Permissions.GetBytes().SequenceEqual(_previousPermissions.GetBytes()) ||
                 _mftHeader.Attributes != _previousAttributes)
                 SystemCalls.UpdateMftEntry(_mftHeader, _mftFileEntry);
-            Close();
+            DialogResult = true;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            if (!_mftHeader.Permission.GetBytes().SequenceEqual(_previousPermissions.GetBytes()) ||
+            if (!_mftHeader.Permissions.GetBytes().SequenceEqual(_previousPermissions.GetBytes()) ||
                 _mftHeader.Attributes != _previousAttributes)
                 if (MessageBox.Show("Сохранить изменения?", "Сохранения свойств объекта",
                         MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
                     SystemCalls.UpdateMftEntry(_mftHeader, _mftFileEntry);
+                    DialogResult = true;
+                }
+
             Close();
         }
     }

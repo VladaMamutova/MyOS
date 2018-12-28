@@ -1,6 +1,8 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
+using MyOS.FileSystem;
+using MyOS.FileSystem.SpecialDataTypes;
 
 namespace MyOS
 {
@@ -9,71 +11,60 @@ namespace MyOS
     /// </summary>
     public partial class LoginWindow
     {
-        public LoginWindow(bool isRegistration = false)
+        public LoginWindow(bool isRegistration)
         {
             InitializeComponent();
-            if(isRegistration) ChangeWindowState();
+            _isRegistrationWindow = isRegistration;
+            SetWindowType();
         }
-        private bool _isRegistrationWindow;
+        private readonly bool _isRegistrationWindow;
 
-        private void ChangeWindowState()
+        private void SetWindowType()
         {
-            if (!_isRegistrationWindow)
+            if (_isRegistrationWindow)
             {
-                SignIn.Content = "Зарегистрироваться";
+                SignIn.Content = "Зарегистрировать";
                 UserTypeRow.Visibility = Visibility.Visible;
-                NeedNewAccountRow.Visibility = Visibility.Collapsed;
             }
             else
             {
                 SignIn.Content = "Войти";
                 UserTypeRow.Visibility = Visibility.Collapsed;
-                NeedNewAccountRow.Visibility = Visibility.Visible;
             }
-            _isRegistrationWindow = !_isRegistrationWindow;
-            UserName.Text = Password.Password = "";
-            
-        }
-        
-        private void Register_Click(object sender, RoutedEventArgs e)
-        {
-            ChangeWindowState();
         }
 
         private void SignIn_Click(object sender, RoutedEventArgs e)
         {
             if (!_isRegistrationWindow)
             {
-                if (Account.SignIn(UserName.Text, Password.Password))
+                try
                 {
+                    SystemCalls.SignIn(UserName.Text, Password.Password);
                     DialogResult = true;
-                    Close();
                 }
-                else
+                catch (FsException fsException)
                 {
-                    MessageBox.Show("Пользователь c таким именем и паролем не зарегистрирован в системе!",
-                        "Ошибка входа в систему", MessageBoxButton.OK, MessageBoxImage.Error);
+                   fsException.ShowError(FsException.Command.SignIn, FsException.Element.User);
                 }
             }
             else
             {
-                if (Account.SignUp(UserName.Text, Password.Password, UserTypeRow.IsChecked != null && UserTypeRow.IsChecked.Value))
+                try
                 {
-                    ChangeWindowState();
+                    SystemCalls.SignUp(UserName.Text, Password.Password,
+                        UserTypeRow.IsChecked != null && UserTypeRow.IsChecked.Value);
+                    DialogResult = true;
                 }
-                else MessageBox.Show("Пользователь c таким именем уже зарегистрирован в системе!",
-                    "Ошибка регистрации в систему", MessageBoxButton.OK, MessageBoxImage.Error);
+                catch (FsException fsException)
+                {
+                    fsException.ShowError(FsException.Command.SignUp, FsException.Element.User);
+                }
             }
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            if(_isRegistrationWindow) ChangeWindowState();
-            else
-            {
-                DialogResult = false;
-                Close();
-            }
+            DialogResult = false;
         }
 
         private void Move(object sender, MouseButtonEventArgs e)
@@ -81,21 +72,14 @@ namespace MyOS
             DragMove();
         }
 
-        private void Register_MouseEnter(object sender, MouseEventArgs e)
+        private void TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            //NeedNewAccount.TextDecorations.Add(TextDecorations.Underline);
-            NeedNewAccountRow.Foreground = Brushes.Black;
-            Cursor = Cursors.Hand;
+            SignIn.IsEnabled = UserName?.Text.TrimEnd() != "" && Password?.Password != "";
         }
 
-        private void Register_MouseLeave(object sender, MouseEventArgs e)
+        private void Password_OnPasswordChanged(object sender, RoutedEventArgs e)
         {
-            //foreach (var item in TextDecorations.Underline)
-            //{
-            //    NeedNewAccount.TextDecorations.Remove(item);
-            //}
-            NeedNewAccountRow.Foreground = Brushes.Gray;
-            Cursor = Cursors.Arrow;
+            SignIn.IsEnabled = UserName?.Text.TrimEnd() != "" && Password?.Password != "";
         }
     }
 }

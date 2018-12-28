@@ -4,9 +4,203 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="ControlWindow" Height="330" Width="523">
+        Title="Параметры" Height="400" Width="500" MinHeight="400" MinWidth="500" WindowStartupLocation="CenterScreen" Background="#FF153742" Activated="ControlWindow_OnActivated">
     <Grid>
-        <Button Grid.Row="0" Grid.Column="0" Content="Форматировать диск" 
-                Margin="0,0,348,256" Click="Format_Click" Background="LightSteelBlue" BorderBrush="DarkCyan"/>
+        <TabControl FontSize="14" Margin="10" TabStripPlacement="Left">
+            <TabItem Header="О системе" Width="170" Height="35" Background="#FF245D70" BorderBrush="#FF153742" >
+                <StackPanel Margin="10" VerticalAlignment="Center" Orientation="Vertical">
+                    <WrapPanel Margin="0,10,0,10" HorizontalAlignment="Center" Width="Auto">
+                        <TextBlock TextWrapping="Wrap" Text="Файловая система:" Padding="0,0,5,0" FontSize="14"/>
+                        <TextBlock x:Name="FsName" TextWrapping="Wrap" FontSize="14"/>
+                    </WrapPanel>
+                    <WrapPanel Margin="0,10,0,10" HorizontalAlignment="Center" Width="Auto">
+                        <TextBlock TextWrapping="Wrap" Text="Метка тома:" Padding="0,0,5,0" FontSize="14"/>
+                        <TextBlock x:Name="VolumeName" TextWrapping="Wrap" FontSize="14"/>
+                    </WrapPanel>
+                    <WrapPanel Margin="0,10,0,10" HorizontalAlignment="Center" Width="Auto">
+                        <TextBlock TextWrapping="Wrap" Text="Состояние тома:" Padding="0,0,5,0" FontSize="14"/>
+                        <TextBlock x:Name="VolumeState" TextWrapping="Wrap" FontSize="14"/>
+                    </WrapPanel>
+                    <Separator Margin="0,10,0,10"></Separator>
+                    <WrapPanel Margin="0,10,0,10" HorizontalAlignment="Center" Width="Auto">
+                        <TextBlock TextWrapping="Wrap" Text="Размер тома:" Padding="0,0,5,0" FontSize="14"/>
+                        <TextBlock x:Name="VolumeSize" TextWrapping="Wrap" FontSize="14"/>
+                    </WrapPanel>
+                    <WrapPanel Margin="0,10,0,10" HorizontalAlignment="Center" Width="Auto">
+                        <TextBlock TextWrapping="Wrap" Text="Занято:" Padding="0,0,5,0"  FontSize="14"/>
+                        <TextBlock x:Name="BusySpace" TextWrapping="Wrap" FontSize="14"/>
+                    </WrapPanel>
+                    <WrapPanel Margin="0,10,0,10" HorizontalAlignment="Center" Width="Auto">
+                        <TextBlock TextWrapping="Wrap" Text="Свободно:" Padding="0,0,5,0"  FontSize="14"/>
+                        <TextBlock x:Name="FreeSpace" TextWrapping="Wrap" FontSize="14"/>
+                    </WrapPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem x:Name="AccountsItem" Header="Учёные записи" Height="35" Background="#FF245D70" BorderBrush="#FF153742">
+                <TabItem.Content>
+                    <Grid x:Name="Users" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <DataGrid x:Name="UserTable" Grid.Row="0"  CanUserResizeRows="False" HeadersVisibility="Column" HorizontalGridLinesBrush="LightGray"  GridLinesVisibility="Horizontal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" CanUserReorderColumns="False" FontSize="14">
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly ="True" Header="Имя пользователя" Binding="{Binding Path=Name}" Width="Auto"/>
+                                <DataGridTextColumn IsReadOnly ="True" Header="ID" Binding="{Binding Path=Id}" Width="40"/>
+                                <DataGridTextColumn IsReadOnly ="True" Header="Тип учётной записи" Binding="{Binding Path=Type}" Width="Auto"/>
+                                <DataGridTextColumn IsReadOnly ="True" Header="Домашняя директория" Binding="{Binding Path=HomeDirectory}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <WrapPanel HorizontalAlignment="Center" Grid.Row="1">
+                            <Button Content="Добавить" Margin="0,10,0,0" Height="28" Width="161" HorizontalAlignment="Center" Click="AddUser" FontSize="14"></Button>
+                            <TextBlock Width="10"></TextBlock>
+                            <Button Content="Удалить" Margin="0,10,0,0" Width="161" HorizontalAlignment="Center" Click="DeleteUser" FontSize="14"></Button>
+                        </WrapPanel>
+                    </Grid>
+                </TabItem.Content>
+            </TabItem>
+            <TabItem x:Name="MftItem" Header="Главная таблица файлов" Height="35" Background="#FF245D70" BorderBrush="#FF153742">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <ListBox Grid.Row="0" x:Name="MftHeaders" SelectionChanged="MftHeaders_OnSelectionChanged"/>
+                    <Grid Grid.Row="1"  Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <WrapPanel Grid.Column="0">
+                            <TextBlock Text="Запись: "/>
+                            <TextBlock x:Name="MftEnty"/>
+                        </WrapPanel>
+                        <WrapPanel Grid.Column="1" HorizontalAlignment="Right">
+                            <TextBlock Text="MFT-пространcтво: "></TextBlock>
+                            <TextBlock x:Name="MftZoneSize"/>
+                            <TextBlock Width="10"/>
+                            <TextBlock Text="$MFT: "></TextBlock>
+                            <TextBlock x:Name="MftSize"/>
+                        </WrapPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="BitmapItem" Header="Битовая карта" Height="35" Background="#FF245D70" BorderBrush="#FF153742">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <DataGrid x:Name="BitmapDataGrid" Grid.Row="0" HeadersVisibility="Column" CanUserResizeRows="False" CanUserResizeColumns="False" HorizontalGridLinesBrush="LightGray" GridLinesVisibility="Horizontal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" CanUserReorderColumns="False">
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Path=RowNumber}" IsReadOnly ="True" Width="Auto" Header="№ кластера">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Background" Value="#FF94CDCD"/>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Binding="{Binding Path=Cell0}" IsReadOnly ="True" Width="Auto" Header="3 - 0"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell1}" IsReadOnly ="True" Width="Auto" Header="7 - 4"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell2}" IsReadOnly ="True" Width="Auto" Header="11 - 8"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell3}" IsReadOnly ="True" Width="Auto" Header="15 - 2"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell4}" IsReadOnly ="True" Width="Auto" Header="19 - 16"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell5}" IsReadOnly ="True" Width="Auto" Header="23 - 20"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell6}" IsReadOnly ="True" Width="Auto" Header="27 - 20"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell7}" IsReadOnly ="True" Width="Auto" Header="31 - 20"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell8}" IsReadOnly ="True" Width="Auto" Header="35 - 20"/>
+                            <DataGridTextColumn Binding="{Binding Path=Cell9}" IsReadOnly ="True" Width="Auto" Header="39 - 20"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <!--<TextBox Visibility="Collapsed" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" x:Name="BitmapData"/>-->
+                    <Grid Grid.Row="1" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <WrapPanel Grid.Column="0">
+                            <TextBlock Text="Всего кластеров: "></TextBlock>
+                            <TextBlock x:Name="ClustersCount"/>
+                            <TextBlock Width="10"/>
+                            <TextBlock Text="Служебных: "></TextBlock>
+                            <TextBlock x:Name="ServiceClusters"/>
+                            <TextBlock Width="10"/>
+                            <TextBlock Text="Занятых: "></TextBlock>
+                            <TextBlock x:Name="BusyClusters"/>
+                            <TextBlock Width="10"/>
+                        </WrapPanel>
+                        <WrapPanel Grid.Column="1" HorizontalAlignment="Right">
+                            <TextBlock Text="Битовая карта: "></TextBlock>
+                            <TextBlock x:Name="BitmapSize"/>
+                            <TextBlock Width="10"/>
+                            <TextBlock Text="Кластер: "></TextBlock>
+                            <TextBlock x:Name="ClusterSize"/>
+                        </WrapPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="FormattingItem" Header="Форматирование" Height="35" Background="#FF245D70" BorderBrush="#FF153742">
+                <Grid Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="200"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition  Height="30"></RowDefinition>
+                        <RowDefinition  Height="10"></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                        <RowDefinition  Height="10"></RowDefinition>
+                        <RowDefinition  Height="30"></RowDefinition>
+                        <RowDefinition Height="10"></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Column="0" Grid.Row="0" Content="Размер тома:" HorizontalAlignment="Right"/>
+                    <ComboBox x:Name="VolumeSizeComboBox" Grid.Column="1" Grid.Row="0" IsReadOnly="True" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
+                        <ComboBoxItem>100 МБ (104 857 600 байт)</ComboBoxItem>
+                        <ComboBoxItem>200 МБ (209 715 200 байт)</ComboBoxItem>
+                        <ComboBoxItem IsSelected="True">400 МБ (419 430 400 байт)</ComboBoxItem>
+                        <ComboBoxItem>800 МБ (838 860 800 байт)</ComboBoxItem>
+                    </ComboBox>
+                    <Label Grid.Column="0" Grid.Row="2" Content="Файловая система:" HorizontalAlignment="Right"/>
+                    <ComboBox x:Name="FsNameComboBox" Grid.Column="1" Grid.Row="2" IsReadOnly="True" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
+                        <ComboBoxItem IsSelected="True">VMFS v2.0 (по умолчанию)</ComboBoxItem>
+                    </ComboBox>
+                    <Label Grid.Column="0" Grid.Row="4" Content="Размер кластера:" HorizontalAlignment="Right"/>
+                    <ComboBox x:Name="BytesPerClusterComboBox" Grid.Column="1" Grid.Row="4" IsReadOnly="True" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
+                        <ComboBoxItem>1024 байт</ComboBoxItem>
+                        <ComboBoxItem>2048 байт</ComboBoxItem>
+                        <ComboBoxItem IsSelected="True">4096 байт</ComboBoxItem>
+                        <ComboBoxItem>8192 байт</ComboBoxItem>
+                    </ComboBox>
+                    <Label Grid.Column="0" Grid.Row="6" Content="Метка тома:" HorizontalAlignment="Right"/>
+                    <ComboBox x:Name="VolumeNameComboBox" Grid.Column="1" IsReadOnly="True" Grid.Row="6" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" >
+                        <ComboBoxItem IsSelected="True">C</ComboBoxItem>
+                        <ComboBoxItem>D</ComboBoxItem>
+                        <ComboBoxItem>E</ComboBoxItem>
+                        <ComboBoxItem>F</ComboBoxItem>
+                        <ComboBoxItem>H</ComboBoxItem>
+                        <ComboBoxItem>I</ComboBoxItem>
+                        <ComboBoxItem>J</ComboBoxItem>
+                    </ComboBox>
+                    <WrapPanel Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="2" HorizontalAlignment="Center" Height="30" VerticalAlignment="Stretch">
+                        <Button Content="Форматировать" Height="30" Width="332" Click="Format_Click"/>
+                    </WrapPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

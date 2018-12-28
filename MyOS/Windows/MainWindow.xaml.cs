@@ -1,8 +1,12 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using MyOS.FileSystem;
+using MyOS.FileSystem.SpecialDataTypes;
+using MyOS.ViewModels;
 
 namespace MyOS
 {
@@ -16,126 +20,102 @@ namespace MyOS
             InitializeComponent();
         }
 
-        public struct FileInfo
-        {
-            public bool Attributes { get; set; } // Атрибуты.
-            public bool FullName { get; set; } // Имя файла с расширением.
-            public bool CreadtionDate { get; set; } // Дата создания.
-            public bool ModificationDate { get; set; } // Дата создания.
-            public bool Size { get; set; } // Размер файла.   
-        }
-        
-
-        private void ShowMenu(object sender, RoutedEventArgs e)
-        {
-            Menu.Visibility = Menu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        private void ShowControlWindow(object sender, RoutedEventArgs e)
-        {
-            ControlWindow controlWindow = new ControlWindow { Owner = this };
-            controlWindow.ShowDialog();
-        }
-
-        private void ShowInfo_Click(object sender, RoutedEventArgs e)
-        {
-            if (FileTable.CurrentCell.Item is DataGridCellInfo ||
-                !(FileTable.SelectedItem is ExplorerFile file)) return;
-            //Установка иконки
-            PropertiesWindow propertiesWindow = new PropertiesWindow(file.MftEntry);
-            propertiesWindow.ShowDialog();
-        }
-
         public void UpdateFileTable()
         {
-            //List<FileRecord> files= SystemCalls.GetFileList((Path)CurrentDirectory.DataContext);
-            //ObservableCollection<ExplorerFile> fileList = new ObservableCollection<ExplorerFile>();
-            //for (int i = 0; i < fileList.Count; ++i)
-            //{
-            //    fileList.Add(new ExplorerFile() { Name = m_pFields.Field[i].AliasName, Value = DisplayedValueForRow(i), Index = i });
-            //}
-
-            //// Set ItemSource to populate grid
-            //addressGrid.ItemsSource = propertyList;
-            FileTable.ItemsSource = SystemCalls.GetFileList((Path)CurrentDirectory.DataContext);
-        }
-
-        private void Sign_Click(object sender, RoutedEventArgs e)
-        {
-            LoginWindow loginWindow = new LoginWindow();
-            loginWindow.ShowDialog();
-        }
-
-        private string GetErrorMessage(int error, string name, string extension)
-        {
-            switch (error)
+            List<ExplorerFile> fileList = new List<ExplorerFile>();
+            var allFiles = SystemCalls.GetFileList(FileSystem.FileSystem.CurrentPath);
+            if (ShowHidden.IsChecked != null && ShowHidden.IsChecked.Value)
+                fileList = allFiles;
+            else
             {
-                case -1: return "Недостаточно места на диске!";
-                case -2: return "В данном расположении уже существует папка с именем \"" + name +
-                            (extension == "" ? "" : '.' + extension) + "\"." + Environment.NewLine +
-                            "Задайте другое имя.";
-                case -3: return "В данном расположении уже существует файл с именем \"" + name +
-                            (extension == "" ? "" : '.' + extension) + "\"." + Environment.NewLine +
-                            "Задайте другое имя.";
+                foreach (var file in allFiles)
+                    if (!file.IsHidden)
+                        fileList.Add(file);
             }
-            return null;
+
+            FileTable.ItemsSource = fileList;
+            FileCount.Text = FileTable.Items.Count.ToString();
+        }
+
+        private void ShowHidden_Checked(object sender, RoutedEventArgs e)
+        {
+            FileTable.ItemsSource = SystemCalls.GetFileList((Path) CurrentDirectory.DataContext);
+            FileCount.Text = FileTable.Items.Count.ToString();
+        }
+
+        private void ShowHidden_Unchecked(object sender, RoutedEventArgs e)
+        {
+            List<ExplorerFile> fileList = new List<ExplorerFile>();
+            var allFiles = SystemCalls.GetFileList((Path) CurrentDirectory.DataContext);
+            foreach (var file in allFiles)
+                if (!file.IsHidden)
+                    fileList.Add(file);
+
+            FileCount.Text = fileList.Count.ToString();
+            FileTable.ItemsSource = fileList;
+        }
+
+        private void Create100Files(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                try
+                {
+                    SystemCalls.Create((Path)CurrentDirectory.DataContext, "file" + (i + 1), "txt");
+                }
+                catch (FsException fs)
+                {
+                    fs.ShowError(FsException.Command.Create, FsException.Element.File);
+                }
+            }
+            UpdateFileTable();
+        }
+        private void Create100Folders(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                try
+                {
+                    SystemCalls.Create((Path) CurrentDirectory.DataContext, "folder" + (i + 1), "",
+                        MftHeader.Attribute.Directory);
+                }
+                catch (FsException fs)
+                {
+                    fs.ShowError(FsException.Command.Create, FsException.Element.Folder);
+                }
+            }
+            UpdateFileTable();
         }
 
         private void CreateFile_Click(object sender, RoutedEventArgs e)
         {
-            FileCreationWindow fileCreation = new FileCreationWindow("Создание файла");
-            fileCreation.ShowDialog();
-            int dotIndex = fileCreation.FileName.Text.LastIndexOf('.');
-            //проверка на длину имени и расширения
-            string name, extension;
-            if (dotIndex == -1)
-            {
-                name = fileCreation.FileName.Text;
-                extension = "";
-            }
-            else
-            {
-                name = fileCreation.FileName.Text.Substring(0, dotIndex);
-                extension = fileCreation.FileName.Text.Substring(dotIndex + 1);
-            }
-
-            MftHeader newFile = new MftHeader(name, extension);
-
-            string error = GetErrorMessage(SystemCalls.CreateFile(newFile, (Path)CurrentDirectory.DataContext), name, extension);
-            if (error != null)
-                MessageBox.Show(error, "Ошибка создания файла!", MessageBoxButton.OK, MessageBoxImage.Error);
-
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    if (i == 1)
-            //        MessageBox.Show("");
-            //    SystemCalls.CreateFile(new MftHeader("file" + (i + 1), "txt"), (Path)CurrentDirectory.DataContext);
-            //}
-            UpdateFileTable();
+            NameWindow name =
+                new NameWindow(FsException.Element.File, (Path) CurrentDirectory.DataContext);
+            name.ShowDialog();
         }
 
         private void CreateFolder_Click(object sender, RoutedEventArgs e)
         {
-            FileCreationWindow fileCreation = new FileCreationWindow("Создание папки");
-            fileCreation.ShowDialog();
-
-            MftHeader newFile = new MftHeader(fileCreation.FileName.Text, attributes: MftHeader.Attribute.Directory);
-            int result = SystemCalls.CreateFile(newFile, (Path) CurrentDirectory.DataContext);
-            string error = GetErrorMessage(result, newFile.FileName, newFile.Extension);
-            if (error != null) MessageBox.Show(error, "Ошибка создания файла!", MessageBoxButton.OK, MessageBoxImage.Error);
-            UpdateFileTable();
+            NameWindow name =
+                new NameWindow(FsException.Element.Folder, (Path) CurrentDirectory.DataContext);
+            name.ShowDialog();
         }
 
-        private void FileTable_OnMouseDoubleClick_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+       private void FileTable_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is ExplorerFile file)) return;
 
             if (file.Attributes == (file.Attributes | (byte) MftHeader.Attribute.Directory))
             {
-
+                if (!SystemCalls.GetMftHeader(file.MftEntry).HasPermissions(FileSystem.FileSystem.CurrentUser, Permission.Rights.Read))
+                {
+                    new FsException(FsException.Code.NoReadPermission, file.FullName).ShowError(
+                        FsException.Command.Open, FsException.Element.Folder);
+                    return;
+                }
                 ((Path) CurrentDirectory.DataContext).Add(file.FullName);
-                CurrentDirectory.Content = ((Path) CurrentDirectory.DataContext).CurrentPath;
+                CurrentDirectory.Text = ((Path) CurrentDirectory.DataContext).CurrentPath;
                 UpdateFileTable();
             }
             else EditFile();
@@ -143,8 +123,10 @@ namespace MyOS
 
         private void PreviousDirectory_Click(object sender, RoutedEventArgs e)
         {
-            ((Path)CurrentDirectory.DataContext).GetPreviosFolder();
-            CurrentDirectory.Content = ((Path)CurrentDirectory.DataContext).CurrentPath;
+            Path path = (Path) CurrentDirectory.DataContext;
+            path.GetPreviosFolder();
+            CurrentDirectory.DataContext = path;
+            CurrentDirectory.Text = ((Path) CurrentDirectory.DataContext).CurrentPath;
             UpdateFileTable();
         }
 
@@ -153,14 +135,38 @@ namespace MyOS
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is ExplorerFile file)) return;
 
-            SystemCalls.Copy((Path)CurrentDirectory.DataContext, file);
+            try
+            {
+                SystemCalls.Copy((Path) CurrentDirectory.DataContext, new DirectoryRecord(file));
+            }
+            catch (FsException fsException)
+            {
+                fsException.ShowError(FsException.Command.Copy,
+                    file.IsDirectory ? FsException.Element.Folder : FsException.Element.File);
+            }
         }
 
         private void Paste_Click(object sender, RoutedEventArgs e)
         {
-            SystemCalls.Paste((Path)CurrentDirectory.DataContext);
+            if (FileSystem.FileSystem.Buffer == null)
+            {
+                MessageBox.Show("Буфер обмена пуст!");
+                return;
+            }
+
+            try
+            {
+                SystemCalls.Paste((Path) CurrentDirectory.DataContext);
+            }
+            catch (FsException fsException)
+            {
+                fsException.ShowError(FsException.Command.Copy,
+                    FileSystem.FileSystem.Buffer.Record.HasAttribute(MftHeader.Attribute.Directory)
+                        ? FsException.Element.Folder
+                        : FsException.Element.File);
+            }
+
             UpdateFileTable();
-            FreeClusters.Content = Bitmap.FreeClusters;
         }
 
         private void EditFile()
@@ -168,37 +174,25 @@ namespace MyOS
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is ExplorerFile file)) return;
 
-            int dotIndex = file.FullName.LastIndexOf('.');
-            //проверка на длину имени и расширения
-            string fileName, extension;
-            if (dotIndex == -1 || file.Attributes ==
-                (file.Attributes | (byte)MftHeader.Attribute.Directory))
+            if (!SystemCalls.GetMftHeader(file.MftEntry).HasPermissions(FileSystem.FileSystem.CurrentUser, Permission.Rights.Read))
             {
-                fileName = file.FullName;
-                extension = "";
-            }
-            else
-            {
-                fileName = file.FullName.Substring(0, dotIndex);
-                extension = file.FullName.Substring(dotIndex + 1);
+                new FsException(FsException.Code.NoReadPermission, file.FullName).ShowError(FsException.Command.Open,
+                    FsException.Element.File);
+                return;
             }
 
-            int directoryMftEntry = SystemCalls.FindDirectoryMftEntry((Path) CurrentDirectory.DataContext);
-            DirectoryRecord record = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(fileName, extension, directoryMftEntry)); 
-            DirectoryRecord bufferRecord = new DirectoryRecord
+            string fullName = ((Path)CurrentDirectory.DataContext).GetAbsolutePath(file.FullName); 
+            foreach (Window window in Application.Current.Windows)
             {
-                Attributes = file.Attributes,
-                CreationDate = file.CreationDate,
-                Extension = extension,
-                FileName = fileName,
-                //Size = file.Size,
-                Number = record.Number
-            };
+                if (window is TextEditorWindow && window.Title == fullName)
+                {
+                    window.Activate();
+                    return;
+                }
+            }
 
-            TextEditorWindow editWindow = new TextEditorWindow(bufferRecord,
-                    Encoding.UTF8.GetString(SystemCalls.ReadFileData(SystemCalls.ReadDataAttributes(bufferRecord.Number))),
-                    (Path)CurrentDirectory.DataContext)
-            { Owner = this };
+            TextEditorWindow editWindow = new TextEditorWindow(file, fullName)
+                {Owner = this};
             editWindow.Show();
         }
 
@@ -207,88 +201,45 @@ namespace MyOS
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is ExplorerFile file)) return;
 
-            FileCreationWindow fileCreation =
-                new FileCreationWindow("Переименование файла") {FileName = {Text = file.FullName}};
-            int dotIndex = file.FullName.LastIndexOf('.');
-            //проверка на длину имени и расширения
-            string prevName, prevExtension;
-            if (dotIndex == -1 || file.Attributes ==
-                (file.Attributes | (byte)MftHeader.Attribute.Directory))
-            {
-                prevName = fileCreation.FileName.Text;
-                prevExtension = "";
-            }
-            else
-            {
-                prevName = fileCreation.FileName.Text.Substring(0, dotIndex);
-                prevExtension = fileCreation.FileName.Text.Substring(dotIndex + 1);
-            }
-            
-            fileCreation.ShowDialog();
-            dotIndex = fileCreation.FileName.Text.LastIndexOf('.');
-            //проверка на длину имени и расширения
-            string name, extension;
-            if (dotIndex == -1)
-            {
-                name = fileCreation.FileName.Text;
-                extension = "";
-            }
-            else
-            {
-                name = fileCreation.FileName.Text.Substring(0, dotIndex);
-                extension = fileCreation.FileName.Text.Substring(dotIndex + 1);
-            }
-
-            int directoryMftEntry = SystemCalls.FindDirectoryMftEntry((Path)CurrentDirectory.DataContext);
-            DirectoryRecord newRecord = SystemCalls.GetFileInDirectory(directoryMftEntry,
-                SystemCalls.GetFilePosition(name, extension, directoryMftEntry));
-            if (newRecord != null)
-            {
-                MessageBox.Show(GetErrorMessage(newRecord.Attributes == (newRecord.Attributes | (byte)MftHeader.Attribute.Directory) ? -2 : -3, name, extension), "Ошибка создания файла!", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            DirectoryRecord lastRecord = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(prevName, prevExtension, directoryMftEntry));
-            SystemCalls.Rename(lastRecord, name, extension, (Path)CurrentDirectory.DataContext);
-
-            UpdateFileTable();
+            NameWindow name =
+                new NameWindow(file, (Path) CurrentDirectory.DataContext);
+            name.ShowDialog();
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             if (FileTable.CurrentCell.Item is DataGridCellInfo ||
                 !(FileTable.SelectedItem is ExplorerFile file)) return;
-
-            int dotIndex = file.FullName.LastIndexOf('.');
-            string extension = dotIndex == -1 || file.Attributes ==
-                               (file.Attributes | (byte)MftHeader.Attribute.Directory)
-                ? ""
-                : file.FullName.Substring(dotIndex + 1);
-            string fileName =
-                file.FullName.Substring(0, extension.Length > 0 ? file.FullName.Length - extension.Length - 1 : file.FullName.Length);
-            int directoryMftEntry = SystemCalls.FindDirectoryMftEntry((Path) CurrentDirectory.DataContext);
-            DirectoryRecord record = new DirectoryRecord()
+            try
             {
-                Attributes = file.Attributes,
-                CreationDate = file.CreationDate,
-                Extension = extension,
-                FileName = fileName,
-                //Size = file.Size,
-                Number = SystemCalls.GetFileInDirectory(directoryMftEntry, SystemCalls.GetFilePosition(fileName, extension, directoryMftEntry)).Number
-            };
-            SystemCalls.Delete((Path)CurrentDirectory.DataContext, record);
+                SystemCalls.Delete((Path) CurrentDirectory.DataContext, new DirectoryRecord(file));
+            }
+            catch (FsException fsException)
+            {
+                fsException.ShowError(FsException.Command.Delete,
+                    file.IsDirectory ? FsException.Element.Folder : FsException.Element.File);
+            }
+
             UpdateFileTable();
-            FreeClusters.Content = Bitmap.FreeClusters;
+        }
+
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
+            if ((Path)CurrentDirectory.DataContext != null)
+                UpdateFileTable();
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            CurrentDirectory.DataContext = new Path();
-            CurrentDirectory.Content = ((Path)CurrentDirectory.DataContext).CurrentPath;
-            User.Text = Account.User.Name;
-            UpdateFileTable();
-            //ImageS.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/file1.png", UriKind.Absolute));
+            FileSystem.FileSystem.CurrentPath = new Path();
+            User.Text = FileSystem.FileSystem.CurrentUser.Name;
+            if (FileSystem.FileSystem.CurrentUser.HomeDirectoryMftEntry != FileSystem.FileSystem.Constants.RootMftEntry)
+                FileSystem.FileSystem.CurrentPath.Add(SystemCalls.GetMftHeader(FileSystem.FileSystem.CurrentUser.HomeDirectoryMftEntry).FileName);
+            CurrentDirectory.DataContext = FileSystem.FileSystem.CurrentPath;
+            CurrentDirectory.Text = FileSystem.FileSystem.CurrentPath.CurrentPath;
             Time.Text = new MyDateTime(DateTime.Now).ToString();
+            UpdateFileTable();
+
             var timer = new System.Windows.Threading.DispatcherTimer
             {
                 Interval = new TimeSpan(0, 1, 0),
@@ -296,11 +247,85 @@ namespace MyOS
             };
             timer.Tick += (o, t) => { Time.Text = new MyDateTime(DateTime.Now).ToString(); };
             timer.Start();
+
+            CreationDateColumn.IsChecked = true;
+            ModificationDateColumn.IsChecked = true;
+            SizeColumn.IsChecked = true;
+            ShowHidden.IsChecked = false;
+        }
+
+        private void CreationDateColumn_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            FileTable.Columns[2].Visibility = CreationDateColumn.IsChecked != null && CreationDateColumn.IsChecked.Value
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void ModificationDateColumn_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            FileTable.Columns[3].Visibility =
+                ModificationDateColumn.IsChecked != null && ModificationDateColumn.IsChecked.Value
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+        }
+
+        private void SizeColumn_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            FileTable.Columns[4].Visibility = SizeColumn.IsChecked != null && SizeColumn.IsChecked.Value
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void User_MouseEnter(object sender, MouseEventArgs e)
+        {
+            User.Foreground = Brushes.White;
+        }
+
+        private void User_MouseLeave(object sender, MouseEventArgs e)
+        {
+            User.Foreground = Brushes.LightGray;
+        }
+
+        private void ShowInfo_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTable.CurrentCell.Item is DataGridCellInfo ||
+                !(FileTable.SelectedItem is ExplorerFile file)) return;
+
+            PropertiesWindow propertiesWindow = new PropertiesWindow(file.MftEntry);
+            propertiesWindow.ShowDialog();
+            UpdateFileTable();
+        }
+
+        private void ShowControlWindow(object sender, RoutedEventArgs e)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is ControlWindow)
+                {
+                    window.Activate();
+                    return;
+                }
+            }
+
+            ControlWindow controlWindow = new ControlWindow(FileSystem.FileSystem.CurrentUser.Id == 0) {Owner = this};
+            controlWindow.Show();
         }
 
         private void User_MouseLeftButtonDown(object sender, RoutedEventArgs e)
         {
+            if (MessageBox.Show("Вы точно хотите выйти из учётной записи?", "Выход из системы", MessageBoxButton.YesNo,
+                    MessageBoxImage.None) == MessageBoxResult.Yes)
+            {
+                System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+                Application.Current.Shutdown();
+            }
+        }
 
+        private void PowerOff_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Вы точно хотите завершить сеанс?", "Завершение работы", MessageBoxButton.YesNo,
+                    MessageBoxImage.None) == MessageBoxResult.Yes)
+                Close();
         }
     }
 }

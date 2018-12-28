@@ -9,10 +9,7 @@ F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\M
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.csproj.CoreCompileInputs.cache
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.exe
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.pdb
-F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.csprojAssemblyReference.cache
-F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\FileCreationWindow.baml
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\TextEditorWindow.baml
-F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\FileCreationWindow.g.cs
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\LoginWindow.g.cs
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\MainWindow.g.cs
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\TextEditorWindow.g.cs
@@ -22,3 +19,9 @@ F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\M
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\PropertiesWindow.g.cs
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\ControlWindow.g.cs
 F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\ControlWindow.baml
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\NameWindow.baml
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\NameWindow.g.cs
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\FormattingWindow.baml
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\Windows\FormattingWindow.g.cs
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS_MarkupCompile.lref
+F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\MyOS.csprojAssemblyReference.cache

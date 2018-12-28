@@ -58,43 +58,53 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AccessControlList.cs" />
-    <Compile Include="Account.cs" />
-    <Compile Include="Bitmap.cs" />
-    <Compile Include="Buffer.cs" />
-    <Compile Include="DataAttributes.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\ClusterState.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\FormattingOptions.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\Buffer.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\Data.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\IRecord.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\MemoryAllocation.cs" />
+    <Compile Include="ViewModels\BitmapRow.cs" />
+    <Compile Include="ViewModels\Commands.cs" />
+    <Compile Include="ViewModels\UserAccount.cs" />
     <Compile Include="Windows\ControlWindow.xaml.cs">
       <DependentUpon>ControlWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\FileCreationWindow.xaml.cs">
-      <DependentUpon>FileCreationWindow.xaml</DependentUpon>
+    <Compile Include="Windows\FormattingWindow.xaml.cs">
+      <DependentUpon>FormattingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\NameWindow.xaml.cs">
+      <DependentUpon>NameWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FileSystem\SpecialDataTypes\FsException.cs" />
     <Compile Include="Windows\PropertiesWindow.xaml.cs">
       <DependentUpon>PropertiesWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Path.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="ExplorerFile.cs" />
-    <Compile Include="HashEncryptor.cs" />
-    <Compile Include="MftHeader.cs" />
-    <Compile Include="MyDateTime.cs" />
-    <Compile Include="Permission.cs" />
-    <Compile Include="DirectoryRecord.cs" />
-    <Compile Include="SystemCalls.cs" />
-    <Compile Include="SystemData.cs" />
-    <Compile Include="SystemConstants.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\Path.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\Extensions.cs" />
+    <Compile Include="ViewModels\ExplorerFile.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\MftHeader.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\MyDateTime.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\Permission.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\DirectoryRecord.cs" />
+    <Compile Include="FileSystem\SystemCalls.cs" />
+    <Compile Include="FileSystem\FileSystem.cs" />
     <Compile Include="Windows\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\TextEditorWindow.xaml.cs">
       <DependentUpon>TextEditorWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="User.cs" />
+    <Compile Include="FileSystem\SpecialDataTypes\UserRecord.cs" />
     <Page Include="Windows\ControlWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Windows\FileCreationWindow.xaml">
+    <Page Include="Windows\FormattingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\NameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -141,6 +151,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ViewModelsClassDiagram.cd" />
+    <None Include="SpecialDataTypesClassDiagram.cd" />
+    <None Include="FileSystemClassDiagram.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -151,9 +165,22 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\file.png" />
-    <Resource Include="Resources\file1.png" />
     <Resource Include="Resources\folder.png" />
-    <Resource Include="Resources\folder1.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\hidden_file.png" />
+    <Resource Include="Resources\hidden_folder.png" />
+    <Resource Include="Resources\tools.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\tools_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\power_off.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\power_off_hover.png" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

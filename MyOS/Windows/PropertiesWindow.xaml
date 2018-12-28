@@ -51,10 +51,10 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Margin="10,10,10,5">
                         <TextBlock HorizontalAlignment="Center" Margin="0,0,0,5" TextWrapping="Wrap" Text="Пользователи:" VerticalAlignment="Top" FontSize="14"/>
-                        <ListBox HorizontalAlignment="Stretch" Focusable="False" VerticalAlignment="Top" FontSize="14">
+                        <ListBox x:Name="UserList" HorizontalAlignment="Stretch" Focusable="False" VerticalAlignment="Top" FontSize="14">
                             <ListBoxItem x:Name="Administrator" Content="Администраторы" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Administrator"/>
                             <ListBoxItem x:Name="OwnerName" Content="Владелец" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Owner"/>
-                            <ListBoxItem Content="Все" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Other"/>
+                            <ListBoxItem x:Name="AllUsers" Content="Все" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Selected="Selected_Other"/>
                     </ListBox>
                     </StackPanel>
                     <StackPanel Grid.Row="1" Margin="10,0">

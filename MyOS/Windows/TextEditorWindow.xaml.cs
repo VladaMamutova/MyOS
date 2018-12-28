@@ -1,4 +1,9 @@
-﻿using System.Windows;
+﻿using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using MyOS.FileSystem;
+using MyOS.FileSystem.SpecialDataTypes;
+using MyOS.ViewModels;
 
 
 namespace MyOS
@@ -8,25 +13,41 @@ namespace MyOS
     /// </summary>
     public partial class TextEditorWindow
     {
-        public TextEditorWindow(DirectoryRecord file, string content, Path path)
+        public TextEditorWindow(ExplorerFile file, string fullName)
         {
             InitializeComponent();
-            Title = file.FileName + (file.Extension.Length == 0 ? "" : '.' + file.Extension);
-            FileContent.Text = content;
-            _buffer = new SystemBuffer
-            {
-                Path = new Path(path),
-                Record = file
-            };
+            Title = fullName;
+            FileContent.Text = _content = Encoding.UTF8.GetString(SystemCalls.ReadFileData(file.MftEntry));
+             _record = new DirectoryRecord(file);
         }
 
-        private readonly SystemBuffer _buffer;
+        private readonly DirectoryRecord _record;
+        private readonly string _content;
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            SystemCalls.SaveFile(_buffer, FileContent.Text);
-            ((MainWindow)Owner).UpdateFileTable();
-            ((MainWindow)Owner).FreeClusters.Content = Bitmap.FreeClusters;
+            try
+            {
+                SystemCalls.Save(_record, Encoding.UTF8.GetBytes(FileContent.Text));
+                Save.IsEnabled = false;
+            }
+            catch (FsException fsException)
+            {
+                fsException.ShowError(FsException.Command.Save,
+                    _record.HasAttribute(MftHeader.Attribute.Directory)
+                        ? FsException.Element.Folder
+                        : FsException.Element.File);
+            }
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void FileContent_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            Save.IsEnabled = _content != FileContent.Text;
         }
     }
 }
