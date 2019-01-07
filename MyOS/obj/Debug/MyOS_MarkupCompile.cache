@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\
+D:\ПИ\3 курс\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\obj\Debug\
 MyOS
 none
 false
 DEBUG;TRACE
-F:\ПИ\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\App.xaml
+D:\ПИ\3 курс\Курсовая работа по ОС (Мамутова В.А.)\MyOS\MyOS\App.xaml
 7-231671138
 
-311773173705
+35571068040
 17-1753167601
 Windows\ControlWindow.xaml;Windows\FormattingWindow.xaml;Windows\NameWindow.xaml;Windows\LoginWindow.xaml;Windows\MainWindow.xaml;Windows\PropertiesWindow.xaml;Windows\TextEditorWindow.xaml;
 
-False
+True
 

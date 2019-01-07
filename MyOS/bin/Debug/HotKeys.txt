@@ -1,0 +1,10 @@
+Copy = Ctrl + Shift + C
+Paste = Ctrl + Shift + V
+Rename = F2
+Delete = Ctrl + Shift + D
+Save = Ctrl + Shift + S
+Show Properties = Apps
+Create File = Ctrl + F
+Create Folder = Ctrl + D
+Create 100 Files = Ctrl + Alt + F
+Create 100 Folders = Ctrl + Alt + D
